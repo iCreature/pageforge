@@ -40,19 +40,28 @@ except ImportError:
 import io
 import time
 import uuid
-import tempfile
-from pathlib import Path
-from typing import Optional, Dict, List, Any, Tuple, Union, Callable, Set, cast
+import logging
+import os
+from typing import Dict, List, Optional, Union, Tuple
+from io import BytesIO
+from PIL import Image as PILImage
 
-# ReportLab imports
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+import reportlab
+from reportlab.lib import colors
+from reportlab.lib import pagesizes
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, ListFlowable, ListItem, Flowable
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, Flowable
+
+from ..models import DocumentData, Section, ImageData
+from ..exceptions import DocuForgeError, ValidationError, RenderingError, ResourceError, ImageError, FontError, SectionError, ConfigurationError
+from .engine_base import Engine
+from ..logging_config import get_logger
+from ..fonts import FontManager
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
@@ -128,7 +137,13 @@ class ReportLabEngine(Engine):
         """
         super().__init__(name=name)
         
-        # Load configuration
+        # Set up logging
+        self.logger = get_logger(f"{__name__}.{self.__class__.__name__}")
+        
+        # Generate a unique ID for this render instance
+        self.render_id = str(uuid.uuid4())[:8]
+        
+        # Configure page parameters from config system
         config = get_config()
         
         # Set rendering parameters from config
@@ -145,10 +160,37 @@ class ReportLabEngine(Engine):
         self.DEFAULT_FONT_SIZE = config.text.default_size
         self.HEADER_FONT_SIZE = config.text.header_size
         
-        # CID fonts for international text
-        self.CID_FONTS = config.fonts.cid
+        # Create font manager
+        self.font_manager = FontManager(
+            default_font=self.DEFAULT_FONT,
+            enable_rtl=True
+        )
         
-        # Generate a unique ID for this rendering instance
+        # Try to find fonts in the package directory
+        self.package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.font_dir = os.path.join(self.package_dir, "fonts")
+        
+        # Create fonts directory if it doesn't exist
+        if not os.path.exists(self.font_dir):
+            try:
+                os.makedirs(self.font_dir, exist_ok=True)
+                self.logger.info(f"Created fonts directory at {self.font_dir}")
+            except Exception as e:
+                self.logger.warning(f"Could not create fonts directory: {str(e)}")
+        
+        # Register system fonts
+        if os.path.exists(self.font_dir):
+            self.font_manager.custom_font_dirs.append(self.font_dir)
+            
+        # CID Font mapping for international text support
+        self.CID_FONTS = {
+            'japanese': 'HeiseiMin-W3',
+            'chinese': 'STSong-Light',
+            'korean': 'HYGothic-Medium',
+            'arabic': 'STSong-Light',
+            'hebrew': 'STSong-Light',
+            'cyrillic': 'Helvetica'
+        }
         self.render_id = str(uuid.uuid4())[:8]
         
         self.logger.debug(
@@ -183,64 +225,76 @@ class ReportLabEngine(Engine):
         # Create a buffer for PDF content
         doc_buffer = io.BytesIO()
         
-        # Register required fonts
+        # Register required fonts using FontManager
         self.logger.debug(f"Registering fonts (ID: {self.render_id})")
-        registered_fonts = 1  # Start with 1 for default font
         
         try:
-            # Register CID fonts for international text support
+            # Register critical CID fonts for international text support
             cid_fonts = {
                 'japanese': self.CID_FONTS.get('japanese', 'HeiseiMin-W3'),
-                'korean': self.CID_FONTS.get('korean', 'HYGothic-Medium'),  # Updated to a valid ReportLab CID font
-                'chinese': self.CID_FONTS.get('chinese', 'STSong-Light')
+                'korean': self.CID_FONTS.get('korean', 'HYGothic-Medium'),
+                'chinese': self.CID_FONTS.get('chinese', 'STSong-Light'),
+                'arabic': self.CID_FONTS.get('arabic', 'STSong-Light'),  # Arabic fallback
+                'hebrew': self.CID_FONTS.get('hebrew', 'STSong-Light')   # Hebrew fallback
             }
             
-            # Register each CID font
+            # Register each CID font through FontManager
+            registered_count = 0
             for script, font_name in cid_fonts.items():
-                try:
-                    pdfmetrics.registerFont(UnicodeCIDFont(font_name))
+                if self.font_manager.register_font(font_name):
                     self.logger.debug(f"Registered {script} font: {font_name} (ID: {self.render_id})")
-                    registered_fonts += 1
-                except Exception as e:
-                    # Use custom FontError for better error reporting
-                    font_error = FontError(
-                        message=f"Failed to register {script} font",
-                        font_name=font_name,
-                        script=script,
-                        details={
-                            "render_id": self.render_id,
-                            "error_message": str(e)
-                        }
-                    )
-                    self.logger.warning(f"{font_error.message}: {font_name}: \"{str(e)}\" (ID: {self.render_id})")
+                    registered_count += 1
+                    
+            # Look for RTL support fonts first
+            rtl_fonts = ['DejaVuSans', 'Arial', 'Arial Unicode MS', 'Noto Sans Arabic', 'Noto Sans Hebrew']
+            for font in rtl_fonts:
+                if self.font_manager.register_font(font):
+                    self.logger.debug(f"Registered RTL-capable font: {font} (ID: {self.render_id})")
+                    registered_count += 1
             
-            # Try registering TTF fallback font if available
-            try:
-                # Try both absolute and relative paths for DejaVuSans.ttf
-                import os
-                possible_paths = [
-                    'DejaVuSans.ttf',
-                    os.path.join(os.path.dirname(__file__), '..', 'DejaVuSans.ttf'),
-                    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-                    '/usr/local/share/fonts/DejaVuSans.ttf'
-                ]
-                
-                for path in possible_paths:
-                    if os.path.exists(path):
-                        pdfmetrics.registerFont(TTFont('DejaVuSans', path))
-                        pdfmetrics.registerFontFamily('DejaVuSans', normal='DejaVuSans')
-                        self.logger.debug(f"Registered DejaVuSans from {path} (ID: {self.render_id})")
-                        registered_fonts += 1
-                        break
-                else:
-                    self.logger.warning(f"DejaVuSans font not available in any expected location (ID: {self.render_id})")
-            except Exception as e:
-                self.logger.warning(f"DejaVuSans font registration error: {str(e)} (ID: {self.render_id})")
+            # Register common system fonts
+            self.logger.debug(f"Scanning for system fonts (ID: {self.render_id})")
             
-            self.logger.info(f"Registered {registered_fonts} fonts for text support (ID: {self.render_id})")
+            # Priority fonts to try to register
+            priority_fonts = [
+                'DejaVuSans', 
+                'Arial', 
+                'Helvetica', 
+                'Times', 
+                'Courier',
+                'Noto Sans', 
+                'Source Sans Pro'
+            ]
+            
+            # Register system fonts with priority list
+            system_fonts_count = self.font_manager.register_system_fonts(priority_fonts)
+            if system_fonts_count > 0:
+                self.logger.info(f"Registered {system_fonts_count} system fonts (ID: {self.render_id})")
+                registered_count += system_fonts_count
+            
+            # Check if we have enough fonts registered
+            total_fonts = len(self.font_manager.registered_fonts)
+            self.logger.info(f"Total registered fonts: {total_fonts} (ID: {self.render_id})")
+            
+            if total_fonts < 3:
+                # Critical warning if we don't have enough fonts
+                self.logger.warning(f"Limited font support available. Only {total_fonts} fonts registered. Text rendering may be degraded. (ID: {self.render_id})")
+            
         except Exception as e:
             self.logger.error(f"Font registration error: {str(e)} (ID: {self.render_id})")
             self.logger.warning(f"Using only default font: {self.DEFAULT_FONT} (ID: {self.render_id})")
+            
+            # Raise a detailed exception with fallback behavior
+            font_error = FontError(
+                message="Font registration failed",
+                details={
+                    "render_id": self.render_id,
+                    "error_message": str(e),
+                    "fallback_font": self.DEFAULT_FONT
+                }
+            )
+            self.logger.warning(f"{font_error} (ID: {self.render_id})")
+            # Don't raise the error, just log it and continue with default font
         
         # Create PDF document with configured page size and margins
         self.logger.debug(f"Creating PDF document with size {self.PAGE_WIDTH}x{self.PAGE_HEIGHT}, margin {self.MARGIN} (ID: {self.render_id})")
@@ -683,8 +737,8 @@ class ReportLabEngine(Engine):
         """
         Set the appropriate font based on text content.
         
-        Analyzes the text content and selects the most appropriate font
-        for rendering based on the Unicode character ranges present.
+        Uses the FontManager to analyze the text content and select the most appropriate font
+        for rendering based on script detection, including RTL support.
         
         Args:
             canvas: ReportLab canvas object
@@ -695,51 +749,71 @@ class ReportLabEngine(Engine):
         Returns:
             Name of the font that was selected and set
         """
-        # Define Unicode character ranges for different scripts
-        ranges = {
-            'japanese': [(0x3040, 0x309F), (0x30A0, 0x30FF)],
-            'korean': [(0xAC00, 0xD7AF)],
-            'chinese': [(0x4E00, 0x9FFF), (0x3000, 0x303F)],
-            'arabic': [(0x0600, 0x06FF)],
-            'cyrillic': [(0x0400, 0x04FF)],
-            'hebrew': [(0x0590, 0x05FF)]
-        }
-        
-        # Get font mapping from configuration
-        font_map = {
-            'japanese': self.CID_FONTS.get('japanese', 'HeiseiMin-W3'),
-            'korean': self.CID_FONTS.get('korean', 'HYSMyeongJo-Medium'),  # Corrected font name
-            'chinese': self.CID_FONTS.get('chinese', 'STSong-Light'),
-            'arabic': self.CID_FONTS.get('arabic', 'STSong-Light'),
-            'hebrew': self.CID_FONTS.get('hebrew', 'STSong-Light'),
-            'cyrillic': self.CID_FONTS.get('cyrillic', default_font),
-            'default': default_font
-        }
-        
         try:
-            # Detect script based on character ranges
-            detected_script = 'default'
-            for script, char_ranges in ranges.items():
-                if any(any(start <= ord(c) <= end for start, end in char_ranges) for c in text):
-                    detected_script = script
-                    break
+            # Register critical fonts if not already registered
+            if len(self.font_manager.registered_fonts) < 3:
+                # Register at least the standard fonts and some international fonts
+                self.logger.debug(f"Registering critical fonts (ID: {self.render_id})")
+                
+                # Try to register key fonts for international support
+                priority_fonts = [
+                    'DejaVuSans',
+                    'Arial Unicode MS',
+                    'Noto Sans',
+                    self.CID_FONTS.get('japanese', 'HeiseiMin-W3'),
+                    self.CID_FONTS.get('chinese', 'STSong-Light'),
+                    self.CID_FONTS.get('korean', 'HYGothic-Medium')
+                ]
+                
+                for font_name in priority_fonts:
+                    self.font_manager.register_font(font_name)
             
-            # Select and set font based on detected script
-            selected_font = font_map.get(detected_script, default_font)
+            # Process RTL text if needed
+            processed_text = text
+            if self.font_manager.is_rtl_text(text):
+                processed_text = self.font_manager.process_rtl_text(text)
+                self.logger.debug(f"Processed RTL text (ID: {self.render_id})")
+            
+            # Use FontManager to determine the best font
+            selected_font = self.font_manager.get_font_for_text(text, default_font)
             
             try:
                 canvas.setFont(selected_font, size)
-                if detected_script != 'default':
-                    self.logger.debug(f"Selected {detected_script} font '{selected_font}' for text")
+                if selected_font != default_font:
+                    self.logger.debug(f"Selected font '{selected_font}' for text (ID: {self.render_id})")
                 return selected_font
             except Exception as e:
-                self.logger.warning(f"Failed to set {detected_script} font '{selected_font}': {str(e)}")
-                canvas.setFont(default_font, size)
-                return default_font
+                # If the selected font fails, try to recover with default font
+                font_error = FontError(
+                    message=f"Failed to set font '{selected_font}'.",
+                    font_name=selected_font,
+                    details={
+                        "render_id": self.render_id,
+                        "error_message": str(e),
+                        "text_sample": text[:20] + ('...' if len(text) > 20 else '')
+                    }
+                )
+                self.logger.warning(f"{font_error} Falling back to {default_font}. (ID: {self.render_id})")
+                
+                # Try the default font instead
+                try:
+                    canvas.setFont(default_font, size)
+                    return default_font
+                except Exception as e2:
+                    # Critical failure - can't even use default font
+                    self.logger.error(f"Critical font error: Cannot set default font {default_font}: {e2} (ID: {self.render_id})")
+                    # Use whatever font ReportLab might accept
+                    canvas.setFont('Helvetica', size)
+                    return 'Helvetica'
                 
         except Exception as e:
             # If any error occurs during font detection, fall back to default
-            self.logger.warning(f"Font detection error: {str(e)}, falling back to {default_font}")
-            canvas.setFont(default_font, size)
-            return default_font
+            self.logger.warning(f"Font selection error: {str(e)}, falling back to {default_font} (ID: {self.render_id})")
+            try:
+                canvas.setFont(default_font, size)
+                return default_font
+            except:
+                # Last resort
+                canvas.setFont('Helvetica', size)
+                return 'Helvetica'
 

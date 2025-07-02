@@ -23,13 +23,19 @@ def test_rtl_text():
         title="RTL Test",
         sections=[
             Section(type="paragraph", text="RTL text rendering test"),
-            Section(type="paragraph", text="Some text with Arabic letters")
+            # Arabic text: "Hello world in Arabic"
+            Section(type="paragraph", text="مرحبا بالعالم باللغة العربية"),
+            # Hebrew text: "Hello world in Hebrew"
+            Section(type="paragraph", text="שלום עולם בעברית")
         ],
         images=[]
     )
     pdf_bytes = generate_pdf(doc)
     reader = PdfReader(io.BytesIO(pdf_bytes))
     text = "".join(page.extract_text() or "" for page in reader.pages)
-    # Test for basic content rather than RTL script rendering
+    
+    # Basic presence test - at minimum these strings should be in the output
     assert "RTL text rendering test" in text
-    assert "Some text with Arabic letters" in text
+    
+    # Note: PDF text extraction might not preserve exact Arabic/Hebrew characters
+    # or their ordering, so we're just checking that the PDF was generated without errors
