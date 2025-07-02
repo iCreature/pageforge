@@ -1,0 +1,4 @@
+# file: /Users/mxolisi.msweli/Desktop/projects/docuforge/src/docuforge/config.py
+# hypothesis_version: 6.135.23
+
+[72.0, 80.0, 120.0, 468.0, 612.0, 792.0, 100, ',', '1', 'Courier', 'DOCUFORGE_', 'HeiseiMin-W3', 'Helvetica', 'INFO', 'STSong-Light', 'Times-Roman', 'builtin', 'chinese', 'cid', 'default_engine', 'default_font', 'default_height', 'default_size', 'default_width', 'fonts', 'formats', 'gif', 'header_size', 'height', 'image', 'japanese', 'jpeg', 'jpg', 'korean', 'line_height', 'log_level', 'logging', 'margin', 'max_content_size_mb', 'max_count', 'max_pages', 'max_width', 'page', 'png', 'r', 'rendering', 'reportlab', 'security', 't', 'text', 'timeout_seconds', 'true', 'width', 'yes']
