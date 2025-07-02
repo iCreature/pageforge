@@ -2,7 +2,7 @@
 Unit tests for docuforge.engines (engine interface, calls, mocks).
 """
 import pytest
-from unittest import mock
+from pypdf import PdfReader
 from docuforge.engines.reportlab_engine import ReportLabEngine
 from docuforge.engines.weasyprint_engine import WeasyPrintEngine
 from docuforge.models import DocumentData

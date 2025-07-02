@@ -4,7 +4,7 @@ Integration tests: generate sample docs, parse PDF, assert text/images.
 import io
 import pytest
 from docuforge import generate_pdf
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 def test_generate_pdf_text_sample(sample_data_dict):
     pdf_bytes = generate_pdf(sample_data_dict)
