@@ -1,19 +1,25 @@
 from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Set
 
-SUPPORTED_IMAGE_FORMATS = {"PNG", "JPG", "JPEG"}
-ALLOWED_SECTION_TYPES = {"table", "paragraph", "list", "header", "footer"}
+# Supported image formats for embedded images
+SUPPORTED_IMAGE_FORMATS: Set[str] = {"PNG", "JPG", "JPEG"}
+
+# Allowed section types for document structure
+ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer"}
 
 @dataclass
 class Section:
     """
     Represents a logical section of a document (table, paragraph, bullet list, header, etc.).
+    
+    A Section is the basic building block for document content. Each section has a specific type
+    that determines how it will be rendered in the final PDF document.
     """
-    type: str
-    rows: Optional[List[List[Any]]] = None
-    text: Optional[str] = None
-    items: Optional[List[str]] = None  # for bullet/numbered lists
-    data: Dict[str, Any] = field(default_factory=dict)
+    type: str  # Type of section: "table", "paragraph", "list", "header", or "footer"
+    rows: Optional[List[List[Any]]] = None  # 2D list of data for tables, where each inner list is a row
+    text: Optional[str] = None  # Text content for paragraphs, headers, and footers
+    items: Optional[List[str]] = None  # List items for bullet/numbered lists
+    data: Dict[str, Any] = field(default_factory=dict)  # Additional metadata or styling information
 
     def __post_init__(self):
         if self.type not in ALLOWED_SECTION_TYPES:
@@ -32,10 +38,13 @@ class Section:
 class ImageData:
     """
     Represents an image to be embedded in the document.
+    
+    Images are stored as raw bytes and can be embedded at various locations in the document.
+    The engine will handle proper placement and scaling of images within the PDF.    
     """
-    name: str
-    data: bytes
-    format: str
+    name: str  # Unique identifier/name for the image
+    data: bytes  # Raw binary image data
+    format: str  # Image format (e.g., "PNG", "JPG", "JPEG")
 
     def __post_init__(self):
         fmt = self.format.upper()
@@ -53,11 +62,15 @@ class ImageData:
 class DocumentData:
     """
     Root document model for DocuForge.
+    
+    This is the top-level container for all document content, including the title,
+    sections (content), images, and additional metadata. This object is passed to the
+    rendering engine to generate the final PDF document.
     """
-    title: str
-    sections: List[Section] = field(default_factory=list)
-    images: List[ImageData] = field(default_factory=list)
-    meta: Dict[str, Any] = field(default_factory=dict)
+    title: str  # Document title that appears in the header and metadata
+    sections: List[Section] = field(default_factory=list)  # List of content sections in order of appearance
+    images: List[ImageData] = field(default_factory=list)  # Images to embed in the document
+    meta: Dict[str, Any] = field(default_factory=dict)  # Additional metadata for document properties
 
     def __post_init__(self):
         if not isinstance(self.sections, list):

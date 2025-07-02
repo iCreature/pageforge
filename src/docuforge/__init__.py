@@ -1,4 +1,5 @@
 import os
+from typing import Dict, Any, Union, Optional
 
 # First, import all modules to avoid circular imports
 from .models import DocumentData
@@ -16,20 +17,34 @@ init_logging(log_file=log_file)
 logger = get_logger(__name__, {'trace_id': TRACE_ID})
 logger.info(f"DocuForge initialized with trace ID: {TRACE_ID}")
 
-def generate_pdf(data, engine="reportlab"):
+def generate_pdf(data: Union[Dict[str, Any], DocumentData], engine: str = "reportlab") -> bytes:
     """
     Public API: Generate PDF bytes from structured data (dict or DocumentData).
     
+    This is the main entry point for generating PDFs with DocuForge. It accepts either
+    a dictionary with document fields or a pre-configured DocumentData object.
+    
     Args:
-        data: Input data as dict or DocumentData object
-        engine: Name of the rendering engine to use (default: "reportlab")
+        data: Input data as dict or DocumentData object. If a dict is provided,
+              it must contain at least a 'title' field, and optionally 'sections',
+              'images', and 'meta' fields that match the DocumentData structure.
+        engine: Name of the rendering engine to use (default: "reportlab").
+              Currently only the ReportLab engine is fully implemented.
         
     Returns:
-        PDF document as bytes
+        PDF document as bytes that can be written to a file or served via HTTP.
         
     Raises:
-        TypeError: If data is not a dict or DocumentData object
-        ValueError: If the engine is not supported or document structure is invalid
+        TypeError: If data is not a dict or DocumentData object.
+        ValueError: If the engine is not supported or document structure is invalid.
+        
+    Example:
+        >>> from docuforge import generate_pdf
+        >>> from docuforge.models import Section
+        >>> doc_data = {"title": "My Document", "sections": [Section(type="paragraph", text="Hello world")]}
+        >>> pdf_bytes = generate_pdf(doc_data)
+        >>> with open("output.pdf", "wb") as f:
+        >>>     f.write(pdf_bytes)
     """
     logger.info(f"Generating PDF using {engine} engine", context={'document_type': type(data).__name__})
     
