@@ -442,33 +442,140 @@ class ReportLabEngine(Engine):
                         elements.append(Spacer(1, self.LINE_HEIGHT))
                         
                     elif stype == "table":
-                        # Extract rows safely
-                        rows = []
-                        if isinstance(section, dict):
-                            rows = section.get("rows", [])
-                        else:
-                            rows = getattr(section, "rows", [])
-                        
-                        # Validate rows is iterable
-                        if not hasattr(rows, "__iter__"):
-                            self.logger.warning(f"Table rows must be iterable, got: {type(rows).__name__}")
-                            continue
-                        
-                        for row in rows:
-                            try:
-                                # Convert row to string cells
+                        try:
+                            # Process table data
+                            rows = []
+                            if isinstance(section, dict):
+                                rows = section.get("rows", [])
+                            else:
+                                rows = getattr(section, "rows", [])
+                            
+                            # Validate rows is iterable
+                            if not hasattr(rows, "__iter__"):
+                                self.logger.warning(f"Table rows must be iterable, got: {type(rows).__name__}")
+                                continue
+                            
+                            # Skip empty tables
+                            if not rows:
+                                continue
+                                
+                            # Handle oversized tables - limit to prevent crashes
+                            MAX_ROWS = 50  # Maximum number of rows to process
+                            MAX_COLS = 20  # Maximum number of columns to process
+                            
+                            original_row_count = len(rows)
+                            original_col_count = len(rows[0]) if rows and hasattr(rows[0], "__len__") else 0
+                            
+                            # Log if we're limiting the table size
+                            if original_row_count > MAX_ROWS or original_col_count > MAX_COLS:
+                                self.logger.warning(
+                                    f"Large table detected: {original_row_count} rows x {original_col_count} columns. "
+                                    f"Limiting to {MAX_ROWS} rows x {MAX_COLS} columns for rendering (ID: {self.render_id})"
+                                )
+                                
+                                # Store the first row (headers) and some sample data rows
+                                limited_rows = [rows[0][:MAX_COLS]] if rows else []
+                                
+                                # Add some sample data rows (up to MAX_ROWS)
+                                for i in range(1, min(MAX_ROWS, original_row_count)):
+                                    if i < len(rows):
+                                        row = rows[i]
+                                        if hasattr(row, "__len__"):
+                                            limited_rows.append(row[:MAX_COLS])
+                                        else:
+                                            limited_rows.append([row])
+                                            
+                                # Add a note about truncation
+                                if original_row_count > MAX_ROWS:
+                                    limited_rows.append([f"[... {original_row_count - MAX_ROWS} more rows ...]" if MAX_COLS > 0 else ""])
+                                    
+                                rows = limited_rows
+                            
+                            # Apply table styling
+                            processed_rows = []
+                            max_cells = 0
+                            for row in rows:
+                                # Convert each cell, using strings for simple content and Paragraphs for complex
+                                row_cells = []
                                 if not isinstance(row, (list, tuple)):
                                     # Convert non-list row to a single cell
-                                    row_cells = [str(row)]
+                                    row_cells.append(str(row))
                                     self.logger.warning(f"Converting non-list row to single cell: {row}")
                                 else:
-                                    row_cells = [str(cell) for cell in row]
-                                
-                                # Create table row
-                                elements.append(Paragraph(" | ".join(row_cells), normal_style))
-                                elements.append(Spacer(1, self.LINE_HEIGHT))
-                            except Exception as e:
-                                self.logger.warning(f"Error processing table row: {e}")
+                                    for cell in row:
+                                        # For simple strings like 'Col0', use plain strings instead of Paragraphs
+                                        # This ensures better text extraction from the PDF
+                                        cell_str = str(cell)
+                                        if len(cell_str) < 20 and '\n' not in cell_str:
+                                            row_cells.append(cell_str)
+                                        else:
+                                            # Use Paragraph for longer or multi-line content
+                                            row_cells.append(Paragraph(cell_str, normal_style))
+                                processed_rows.append(row_cells)
+                                max_cells = max(max_cells, len(row_cells))
+                            
+                            # Initialize table style
+                            table_style_commands = [
+                                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                                ('BOX', (0, 0), (-1, -1), 1, colors.black),
+                                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),  # Header row
+                                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold')  # Header font
+                            ]
+                            
+                            # Get table style data from section
+                            table_style_data = {}
+                            if isinstance(section, dict) and "style" in section:
+                                table_style_data = section.get("style", {})
+                            elif hasattr(section, "style") and section.style:
+                                table_style_data = section.style
+                            
+                            # Apply custom style if present
+                            table_width = self.PAGE_WIDTH - (2 * self.MARGIN)
+                            if "width_percentage" in table_style_data:
+                                width_pct = float(table_style_data["width_percentage"]) / 100.0
+                                table_width = table_width * width_pct
+                            
+                            # Column widths with safeguards for extremely large tables
+                            col_widths = None
+                            if "col_widths" in table_style_data:
+                                col_widths = table_style_data["col_widths"]
+                            else:
+                                # For large tables, create reasonable default column widths
+                                if max_cells > 0:
+                                    # Limit max columns to a reasonable number to prevent crashes
+                                    if max_cells > 20:
+                                        self.logger.warning(f"Table has {max_cells} columns, limiting display width")
+                                        # Use a smaller fixed width for many columns
+                                        col_width = min(20, table_width / max_cells)
+                                    else:
+                                        col_width = table_width / max_cells
+                                    col_widths = [col_width] * max_cells
+                            
+                            # Create table with styling
+                            table_style = TableStyle(table_style_commands)
+                            table = Table(processed_rows, colWidths=col_widths, style=table_style)
+                            
+                            # Add spacer before table
+                            space_before = 6
+                            if "space_before" in table_style_data:
+                                space_before = table_style_data["space_before"]
+                            elements.append(Spacer(1, space_before))
+                            
+                            # Add the table to elements
+                            elements.append(table)
+                            
+                            # Add spacer after table
+                            space_after = 6
+                            if "space_after" in table_style_data:
+                                space_after = table_style_data["space_after"]
+                            elements.append(Spacer(1, space_after))
+                        
+                        except Exception as e:
+                            self.logger.error(f"Error processing table: {str(e)} (ID: {self.render_id})")
+                            # Add a placeholder for failed table
+                            elements.append(Paragraph(f"[Table processing error: {str(e)}]", normal_style))
+                            elements.append(Spacer(1, self.LINE_HEIGHT))
                     
                     elif stype == "list":
                         # Get list items safely
