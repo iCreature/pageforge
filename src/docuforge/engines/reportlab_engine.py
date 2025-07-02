@@ -1,6 +1,9 @@
 from .engine_base import Engine
 from ..models import DocumentData
 
+import logging
+logger = logging.getLogger("docuforge.reportlab")
+
 class ReportLabEngine(Engine):
     def _render(self, doc: DocumentData) -> bytes:
         from reportlab.lib.pagesizes import letter
@@ -18,6 +21,8 @@ class ReportLabEngine(Engine):
         c = canvas.Canvas(buffer, pagesize=letter)
         font_name = "Helvetica"
         c.setFont(font_name, 14)
+
+        logger.info(f"Rendering PDF for doc title: {getattr(doc, 'title', None)}")
 
         def draw_header_footer(page_num):
             header = getattr(doc, "header", None) or next((s["text"] for s in getattr(doc, "sections", []) if s.get("type") == "header"), None)
@@ -53,29 +58,34 @@ class ReportLabEngine(Engine):
         # Draw sections
         if hasattr(doc, "sections"):
             for section in doc.sections:
-                if isinstance(section, dict):
-                    section_type = section.get("type")
-                else:
-                    section_type = getattr(section, "type", None)
-                if section_type == "header" or section_type == "footer":
-                    continue  # Already handled
-                elif section_type == "paragraph":
-                    stext = section["text"] if isinstance(section, dict) else getattr(section, "text", "")
-                    ensure_space(LINE_HEIGHT)
-                    c.drawString(MARGIN, y, stext)
-                    y -= LINE_HEIGHT
-                elif section_type == "table":
-                    rows = section["rows"] if isinstance(section, dict) else getattr(section, "rows", [])
-                    for row in rows:
+                try:
+                    if isinstance(section, dict):
+                        section_type = section.get("type")
+                    else:
+                        section_type = getattr(section, "type", None)
+                    if section_type == "header" or section_type == "footer":
+                        continue  # Already handled
+                    elif section_type == "paragraph":
+                        stext = section["text"] if isinstance(section, dict) else getattr(section, "text", "")
                         ensure_space(LINE_HEIGHT)
-                        c.drawString(MARGIN, y, " | ".join(str(cell) for cell in row))
+                        c.drawString(MARGIN, y, stext)
                         y -= LINE_HEIGHT
-                elif section_type == "list":
-                    items = section["items"] if isinstance(section, dict) else getattr(section, "items", [])
-                    for item in items:
-                        ensure_space(LINE_HEIGHT)
-                        c.drawString(MARGIN + 20, y, f"• {item}")
-                        y -= LINE_HEIGHT
+                    elif section_type == "table":
+                        rows = section["rows"] if isinstance(section, dict) else getattr(section, "rows", [])
+                        for row in rows:
+                            ensure_space(LINE_HEIGHT)
+                            c.drawString(MARGIN, y, " | ".join(str(cell) for cell in row))
+                            y -= LINE_HEIGHT
+                    elif section_type == "list":
+                        items = section["items"] if isinstance(section, dict) else getattr(section, "items", [])
+                        for item in items:
+                            ensure_space(LINE_HEIGHT)
+                            c.drawString(MARGIN + 20, y, f"• {item}")
+                            y -= LINE_HEIGHT
+                    else:
+                        logger.warning(f"Unknown section type: {section_type}")
+                except Exception as e:
+                    logger.error(f"Failed to render section {section}: {e}")
         # Draw all images
         if hasattr(doc, "images") and doc.images:
             for img in doc.images:
@@ -86,9 +96,14 @@ class ReportLabEngine(Engine):
                         img_stream = io.BytesIO(img_data)
                         c.drawImage(ImageReader(img_stream), MARGIN, y - IMAGE_HEIGHT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT)
                         y -= IMAGE_HEIGHT + 10
-                    except Exception:
-                        pass  # Don't fail if image is invalid
-        c.showPage()
-        c.save()
-        buffer.seek(0)
-        return buffer.read()
+                    except Exception as e:
+                        logger.error(f"Failed to render image {getattr(img, 'name', None)}: {e}")
+        try:
+            c.showPage()
+            c.save()
+            buffer.seek(0)
+            logger.info("PDF rendering complete.")
+            return buffer.read()
+        except Exception as e:
+            logger.error(f"Failed to finalize PDF: {e}")
+            raise

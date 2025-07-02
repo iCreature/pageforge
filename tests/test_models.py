@@ -4,20 +4,24 @@ Unit tests for docuforge.models (dataclasses, validation, edge cases).
 import pytest
 from docuforge import models
 
-@pytest.mark.parametrize("data,valid", [
-    ({"title": "Invoice", "sections": [], "images": []}, True),
-    ({"title": "", "sections": [], "images": []}, True),
-    ({"title": "Invoice", "sections": None, "images": []}, False),
-    ({"title": "Invoice", "sections": [], "images": None}, False),
-    # With metadata
-    ({"title": "Report", "sections": [], "images": [], "meta": {"author": "LLM"}}, True),
-])
-def test_documentdata_validation(data, valid):
-    if valid:
+def test_documentdata_validation_cases():
+    # Valid cases
+    valid_cases = [
+        {"title": "Invoice", "sections": [], "images": []},
+        {"title": "", "sections": [], "images": []},
+        {"title": "Report", "sections": [], "images": [], "meta": {"author": "LLM"}},
+    ]
+    for data in valid_cases:
         models.DocumentData(**data)
-    else:
+    # Invalid cases
+    invalid_cases = [
+        {"title": "Invoice", "sections": None, "images": []},
+        {"title": "Invoice", "sections": [], "images": None},
+    ]
+    for data in invalid_cases:
         with pytest.raises(Exception):
             models.DocumentData(**data)
+
 
 def test_section_edge_cases():
     # Zero items
