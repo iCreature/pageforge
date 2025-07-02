@@ -19,7 +19,7 @@ def sample_data_dict():
             {"type": "paragraph", "text": "Thank you for your business."}
         ],
         "images": [
-            {"name": "logo", "data": b"fakeimagedata", "format": "PNG"}
+            {"name": "logo", "format": "PNG", "data": b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\x0d\n\x2d\xb4\x00\x00\x00\x00IEND\xaeB`\x82"}
         ],
         "footer": "Page 1 of 1"
     }

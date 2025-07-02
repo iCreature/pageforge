@@ -54,7 +54,7 @@ def test_builder_adds_images(sample_data_dict):
     assert builder._images == expected_images
 
     # Add image from dict
-    builder.add_image({"name": "logo", "data": b"abc", "format": "PNG"})
+    builder.add_image({"name": "logo", "format": "PNG", "data": b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\x0d\n\x2d\xb4\x00\x00\x00\x00IEND\xaeB`\x82"})
     assert builder._images[-1].name == "logo"
 
     # Invalid image type
