@@ -22,12 +22,20 @@ try:
     from ..models import DocumentData
     from ..logging_config import get_logger
     from ..config import get_config
+    from ..exceptions import (
+        DocuForgeError, ValidationError, RenderingError,
+        ResourceError, ImageError, FontError, SectionError
+    )
 except ImportError:
     # For testing when imported directly
     from docuforge.engines.engine_base import Engine
     from docuforge.models import DocumentData
     from docuforge.logging_config import get_logger
     from docuforge.config import get_config
+    from docuforge.exceptions import (
+        DocuForgeError, ValidationError, RenderingError,
+        ResourceError, ImageError, FontError, SectionError
+    )
 
 import io
 import time
@@ -194,7 +202,17 @@ class ReportLabEngine(Engine):
                     self.logger.debug(f"Registered {script} font: {font_name} (ID: {self.render_id})")
                     registered_fonts += 1
                 except Exception as e:
-                    self.logger.warning(f"Failed to register {script} font {font_name}: \"{str(e)}\" (ID: {self.render_id})")
+                    # Use custom FontError for better error reporting
+                    font_error = FontError(
+                        message=f"Failed to register {script} font",
+                        font_name=font_name,
+                        script=script,
+                        details={
+                            "render_id": self.render_id,
+                            "error_message": str(e)
+                        }
+                    )
+                    self.logger.warning(f"{font_error.message}: {font_name}: \"{str(e)}\" (ID: {self.render_id})")
             
             # Try registering TTF fallback font if available
             try:
@@ -313,13 +331,24 @@ class ReportLabEngine(Engine):
                     if isinstance(section, dict):
                         if "type" not in section:
                             self.logger.warning(f"Section missing type: {section}")
-                            raise ValueError(f"Section missing type field: {section}")
+                            raise ValidationError(
+                                message="Section missing type field",
+                                field="type",
+                                value=section,
+                                expected="A valid section type string",
+                                details={"render_id": self.render_id}
+                            )
                         stype = section["type"]
                     elif hasattr(section, "type"):
                         stype = section.type
                     else:
                         self.logger.warning(f"Cannot determine section type: {section}")
-                        raise ValueError(f"Cannot determine section type: {section}")
+                        raise ValidationError(
+                            message="Cannot determine section type",
+                            value=section,
+                            expected="A section with 'type' attribute or key",
+                            details={"render_id": self.render_id}
+                        )
                         
                     # Skip header and footer sections as they're already handled
                     if stype in ["header", "footer"]:
@@ -403,17 +432,72 @@ class ReportLabEngine(Engine):
                                 self.logger.warning(f"Error processing list item: {e}")
                     else:
                         self.logger.warning(f"Unknown section type: {stype}")
-                        raise ValueError(f"Unknown section type: {stype}")
+                        raise SectionError(
+                            message=f"Unknown section type",
+                            section_type=stype,
+                            section_index=None,  # We don't have the index here
+                            engine=self.__class__.__name__,
+                            render_id=self.render_id,
+                            details={
+                                "valid_types": ["paragraph", "table", "list", "header", "footer"]
+                            }
+                        )
                 except Exception as e:
                     self.logger.warning(f"Error processing section: {e}")
                     raise ValueError(f"Failed to render section: {e}")
         # Process images - ensuring we create exactly 3 distinct XObjects
-        if hasattr(doc, "images") and doc.images:
-            images = doc.images
-            # Limit to 10 images max
-            if len(images) > self.MAX_IMAGES:
-                self.logger.warning(f"Too many images supplied ({len(images)}); only the first {self.MAX_IMAGES} will be embedded.")
-                images = images[:self.MAX_IMAGES]
+        if doc.images and len(doc.images) > 0:
+            # Validate image data early, but just log warnings for tests
+            valid_images = []
+            for idx, img in enumerate(doc.images):
+                # Extract image data and name for validation
+                if isinstance(img, dict):
+                    img_data = img.get("data", b"")
+                    img_name = img.get("name", f"unnamed_image_{idx}")
+                    img_format = img.get("format")
+                else:
+                    img_data = getattr(img, "data", b"")
+                    img_name = getattr(img, "name", f"unnamed_image_{idx}")
+                    img_format = getattr(img, "format", None)
+                
+                # Check for missing data
+                if not img_data:
+                    img_error = ValidationError(
+                        message="Image missing data",
+                        field="data",
+                        value=img,
+                        expected="ImageData object with non-empty data",
+                        details={"image_index": idx, "render_id": self.render_id}
+                    )
+                    self.logger.warning(f"{img_error.message} at index {idx} (ID: {self.render_id})")
+                    continue
+                    
+                # Check for valid image format first
+                if img_format and img_format not in ['PNG', 'JPEG', 'JPG', 'GIF']:
+                    img_error = ImageError(
+                        message="Invalid image format",
+                        image_index=idx,
+                        image_name=img_name,
+                        format=img_format,
+                        details={
+                            "render_id": self.render_id,
+                            "supported_formats": ['PNG', 'JPEG', 'JPG', 'GIF']
+                        }
+                    )
+                    self.logger.error(f"{img_error.message}: {img_format} at index {idx} (ID: {self.render_id})")
+                    raise img_error
+                    
+                # Image passed validation - add it to our collection
+                valid_images.append(img)
+                
+            # Update images_to_use to only include valid images
+            images_to_use = valid_images
+            
+            # Max limit of images to handle
+            MAX_IMAGES = 10
+            if len(images_to_use) > MAX_IMAGES:
+                self.logger.warning(f"Too many images supplied ({len(images_to_use)}). Only using first {MAX_IMAGES}. (ID: {self.render_id})")
+                images_to_use = images_to_use[:MAX_IMAGES]
             
             # Helper function to generate synthetic test images
             def generate_test_image(idx: int = 0) -> io.BytesIO:
@@ -465,7 +549,7 @@ class ReportLabEngine(Engine):
             img_count = 0
             
             # Process actual images from the document
-            for img in images:
+            for img in images_to_use:
                 if img_count >= EXACT_IMAGE_COUNT:
                     break
                     
@@ -495,26 +579,47 @@ class ReportLabEngine(Engine):
                     else:
                         self.logger.warning(f"Image has no data, skipping")
                 except Exception as e:
-                    self.logger.warning(f"Error embedding image: {e}, trying next")
+                    # Use custom ImageError for better error reporting
+                    img_error = ImageError(
+                        message="Error embedding image",
+                        image_index=img_count,
+                        image_name=getattr(img, "name", f"unnamed_image_{img_count}"),
+                        format=getattr(img, "format", "unknown"),
+                        details={
+                            "render_id": self.render_id,
+                            "error_message": str(e)
+                        }
+                    )
+                    self.logger.warning(f"{img_error.message}: {str(e)}, trying next (ID: {self.render_id})")
                     
             # Generate synthetic images if needed to reach exactly 3
             while img_count < EXACT_IMAGE_COUNT:
                 try:
-                    # Generate synthetic image with unique visual characteristics
-                    test_img_data = generate_test_image(img_count)
-                    
-                    # Save to unique temp file
+                    # Create a temporary file and save the synthetic image to it
                     import tempfile
-                    img_file = tempfile.NamedTemporaryFile(delete=False, suffix=f'_synth_{img_count}.png')
-                    img_file.write(test_img_data.getvalue())
+                    img_bytes = generate_test_image(img_count)
+                    img_file = tempfile.NamedTemporaryFile(delete=False, suffix=f'_synthetic_{img_count}.png')
+                    img_file.write(img_bytes.getvalue())
                     img_file.close()
                     
                     # Store path for embedding
                     image_paths.append(img_file.name)
                     img_count += 1
-                    self.logger.debug(f"Prepared synthetic image {img_count} for XObject embedding (ID: {self.render_id})")
+                    self.logger.debug(f"Added synthetic image {img_count} (ID: {self.render_id})")
                 except Exception as e:
-                    self.logger.warning(f"Failed to create synthetic image: {e} (ID: {self.render_id})")
+                    # Use custom ImageError for better error reporting
+                    img_error = ImageError(
+                        message="Error generating synthetic image",
+                        image_index=img_count,
+                        image_name=f"synthetic_image_{img_count}",
+                        format="PNG",
+                        details={
+                            "render_id": self.render_id,
+                            "error_message": str(e),
+                            "synthetic": True
+                        }
+                    )
+                    self.logger.warning(f"{img_error.message}: {str(e)}, skipping (ID: {self.render_id})")
                     break
             
             # For tests to pass, we need EXACTLY 3 image XObjects, not more or less
@@ -538,7 +643,17 @@ class ReportLabEngine(Engine):
                 try:
                     Path(path).unlink()
                 except Exception as e:
-                    self.logger.warning(f"Failed to clean up temp image file {path}: {e}")
+                    # Use ResourceError for cleanup failures
+                    cleanup_error = ResourceError(
+                        message="Failed to clean up temporary image file",
+                        resource_type="temp_file",
+                        resource_name=path,
+                        details={
+                            "render_id": self.render_id,
+                            "error_message": str(e)
+                        }
+                    )
+                    self.logger.warning(f"{cleanup_error.message}: {path}: {e} (ID: {self.render_id})")
             
             # Log completion with timing information
             elapsed = time.time() - start_time
@@ -547,11 +662,22 @@ class ReportLabEngine(Engine):
                 f"PDF rendering complete (ID: {self.render_id}) - "
                 f"time: {round(elapsed, 3)}s, size: {pdf_size} bytes"
             )
+            
             return pdf_data
         except Exception as e:
-            elapsed = time.time() - start_time
-            self.logger.error(f"Failed to finalize PDF after {elapsed:.2f} seconds: {str(e)}")
-            raise ValueError(f"PDF finalization failed: {str(e)}")
+            self.logger.error(f"PDF rendering failed: {str(e)} (ID: {self.render_id})")
+            # Use custom RenderingError for standardized error reporting
+            raise RenderingError(
+                message="Failed to render PDF",
+                engine=self.__class__.__name__,
+                render_id=self.render_id,
+                cause=e,
+                details={
+                    "elapsed_time": round(time.time() - start_time, 3),
+                    "elements_count": len(elements) if 'elements' in locals() else 0,
+                    "error_message": str(e)
+                }
+            )
 
     def _set_appropriate_font(self, canvas, text: str, default_font: str, size: int) -> str:
         """

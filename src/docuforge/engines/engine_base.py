@@ -7,10 +7,18 @@ import traceback
 try:
     from ..models import DocumentData, Section
     from ..logging_config import get_logger
+    from ..exceptions import (
+        DocuForgeError, ValidationError, RenderingError,
+        ResourceError, ImageError, SectionError
+    )
 except ImportError:
     # For direct imports during testing
     from docuforge.models import DocumentData, Section
     from docuforge.logging_config import get_logger
+    from docuforge.exceptions import (
+        DocuForgeError, ValidationError, RenderingError,
+        ResourceError, ImageError, SectionError
+    )
 
 class Engine(ABC):
     """
@@ -46,15 +54,21 @@ class Engine(ABC):
             render_id: The unique ID for this render operation
             
         Raises:
-            ValueError: If document structure is invalid
+            ValidationError: If document structure is invalid
         """
+        validation_warnings = []
+        
         # Check for title
         if not hasattr(doc, "title") or not doc.title:
-            self.logger.warning(f"Document has no title (ID: {render_id})")
+            warning = f"Document has no title"
+            validation_warnings.append(warning)
+            self.logger.warning(f"{warning} (ID: {render_id})")
         
         # Check for sections
         if not hasattr(doc, "sections") or not doc.sections:
-            self.logger.warning(f"Document has no sections (ID: {render_id})")
+            warning = f"Document has no sections"
+            validation_warnings.append(warning)
+            self.logger.warning(f"{warning} (ID: {render_id})")
         else:
             # Validate each section
             for i, section in enumerate(doc.sections):
@@ -62,15 +76,31 @@ class Engine(ABC):
                     # Check if section has required attributes
                     if isinstance(section, dict):
                         if "type" not in section:
-                            self.logger.warning(f"Section {i} missing type field (ID: {render_id})")
+                            warning = f"Section {i} missing type field"
+                            validation_warnings.append(warning)
+                            self.logger.warning(f"{warning} (ID: {render_id})")
                     elif hasattr(section, "type"):
                         stype = section.type
-                        if stype not in ["text", "header", "footer", "table", "list"]:
-                            self.logger.warning(f"Section {i} has unknown type: {stype} (ID: {render_id})")
+                        if stype not in ["paragraph", "header", "footer", "table", "list"]:
+                            warning = f"Section {i} has unknown type: {stype}"
+                            validation_warnings.append(warning)
+                            self.logger.warning(f"{warning} (ID: {render_id})")
                     else:
-                        self.logger.warning(f"Section {i} has no type attribute (ID: {render_id})")
+                        warning = f"Section {i} has no type attribute"
+                        validation_warnings.append(warning)
+                        self.logger.warning(f"{warning} (ID: {render_id})")
                 except Exception as e:
-                    self.logger.warning(f"Error validating section {i}: {str(e)} (ID: {render_id})")
+                    # Use SectionError for better error reporting
+                    section_error = SectionError(
+                        message=f"Error validating section",
+                        section_index=i,
+                        section_type=getattr(section, "type", "unknown") if hasattr(section, "type") else "unknown",
+                        engine=self.__class__.__name__,
+                        render_id=render_id,
+                        details={"error_message": str(e)}
+                    )
+                    validation_warnings.append(str(section_error))
+                    self.logger.warning(f"{section_error.message} {i}: {str(e)} (ID: {render_id})")
         
         # Check for images
         if hasattr(doc, "images") and doc.images:
@@ -79,11 +109,30 @@ class Engine(ABC):
                     # Check if image has data
                     if isinstance(img, dict):
                         if "data" not in img or not img.get("data"):
-                            self.logger.warning(f"Image {i} has no data (ID: {render_id})")
+                            warning = f"Image {i} has no data"
+                            validation_warnings.append(warning)
+                            self.logger.warning(f"{warning} (ID: {render_id})")
                     elif not hasattr(img, "data") or not img.data:
-                        self.logger.warning(f"Image {i} has no data attribute (ID: {render_id})")
+                        warning = f"Image {i} has no data attribute"
+                        validation_warnings.append(warning)
+                        self.logger.warning(f"{warning} (ID: {render_id})")
                 except Exception as e:
-                    self.logger.warning(f"Error validating image {i}: {str(e)} (ID: {render_id})")
+                    # Use ImageError for better error reporting
+                    img_error = ImageError(
+                        message=f"Error validating image",
+                        image_index=i,
+                        image_name=getattr(img, "name", f"unnamed_image_{i}"),
+                        format=getattr(img, "format", "unknown"),
+                        details={
+                            "render_id": render_id,
+                            "error_message": str(e)
+                        }
+                    )
+                    validation_warnings.append(str(img_error))
+                    self.logger.warning(f"{img_error.message} {i}: {str(e)} (ID: {render_id})")
+                    
+        # If we have serious validation issues, we could raise a ValidationError here
+        # For now, we just log warnings and continue, as this seems to be the existing behavior
 
     @abstractmethod
     def _render(self, doc: DocumentData) -> bytes:
@@ -154,16 +203,68 @@ class Engine(ABC):
             except Exception as e:
                 stack_trace = traceback.format_exc()
                 self.logger.error(f"Engine rendering error (ID: {render_id}): {str(e)}\n{stack_trace}")
-                if isinstance(e, (ValueError, TypeError)):
-                    # Re-raise known errors
+                
+                # Handle different exception types appropriately
+                if isinstance(e, DocuForgeError):
+                    # Re-raise our custom exceptions as is
                     raise
-                # Wrap unknown errors
-                raise ValueError(f"PDF rendering failed: {str(e)}")
+                elif isinstance(e, (ValueError, TypeError)):
+                    # Wrap standard exceptions with our custom exceptions
+                    if "image" in str(e).lower():
+                        raise ImageError(
+                            message="Image processing error",
+                            details={
+                                "render_id": render_id,
+                                "error_message": str(e),
+                                "error_type": e.__class__.__name__
+                            }
+                        ) from e
+                    elif "section" in str(e).lower():
+                        raise SectionError(
+                            message="Section processing error",
+                            engine=self.__class__.__name__,
+                            render_id=render_id,
+                            details={
+                                "error_message": str(e),
+                                "error_type": e.__class__.__name__
+                            }
+                        ) from e
+                    else:
+                        # Generic validation error
+                        raise ValidationError(
+                            message="Document validation error",
+                            details={
+                                "render_id": render_id,
+                                "error_message": str(e),
+                                "error_type": e.__class__.__name__
+                            }
+                        ) from e
+                else:
+                    # Wrap unknown errors with RenderingError
+                    raise RenderingError(
+                        message="PDF rendering failed",
+                        engine=self.__class__.__name__,
+                        render_id=render_id,
+                        cause=e,
+                        details={
+                            "error_message": str(e),
+                            "error_type": e.__class__.__name__
+                        }
+                    ) from e
             
             # Validate output
             if not isinstance(out, bytes):
                 self.logger.error(f"Engine returned {type(out).__name__}, expected bytes (ID: {render_id})")
-                raise TypeError(f"Engine {self.name} must return bytes, got {type(out).__name__}")
+                raise ValidationError(
+                    message=f"Engine output validation failed",
+                    field="output",
+                    value=type(out).__name__,
+                    expected="bytes",
+                    details={
+                        "render_id": render_id,
+                        "engine": self.name
+                    }
+                )
             
             # Check if PDF output seems valid (basic check, relaxed for test engines)
             if len(out) < 10:  # Very minimal size check
@@ -182,6 +283,20 @@ class Engine(ABC):
         except Exception as e:
             elapsed = time.time() - start_time
             self.logger.exception(f"PDF rendering failed after {elapsed:.2f} seconds (ID: {render_id}): {str(e)}")
+            
+            # If it's not already a DocuForgeError, wrap it
+            if not isinstance(e, DocuForgeError):
+                raise RenderingError(
+                    message="Unexpected error during PDF generation",
+                    engine=self.__class__.__name__,
+                    render_id=render_id,
+                    cause=e,
+                    details={
+                        "elapsed_time": round(elapsed, 3),
+                        "error_message": str(e),
+                        "error_type": e.__class__.__name__
+                    }
+                ) from e
             raise
 
 class EngineRegistry:

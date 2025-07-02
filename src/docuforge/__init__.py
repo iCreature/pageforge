@@ -5,6 +5,10 @@ from typing import Dict, Any, Union, Optional
 from .models import DocumentData
 from .builder import DocumentBuilder
 from .engines.reportlab_engine import ReportLabEngine
+from .exceptions import (
+    DocuForgeError, ValidationError, RenderingError,
+    ResourceError, ImageError, FontError, SectionError, ConfigurationError
+)
 
 # After all modules are imported, set up logging
 from .logging_config import get_logger, init_logging, TRACE_ID
@@ -35,8 +39,13 @@ def generate_pdf(data: Union[Dict[str, Any], DocumentData], engine: str = "repor
         PDF document as bytes that can be written to a file or served via HTTP.
         
     Raises:
-        TypeError: If data is not a dict or DocumentData object.
-        ValueError: If the engine is not supported or document structure is invalid.
+        ValidationError: If document structure is invalid or data is improperly formatted.
+        ConfigurationError: If the specified engine is not supported.
+        RenderingError: If the rendering process fails.
+        ImageError: If there are issues with image processing or embedding.
+        SectionError: If there are issues with section content or processing.
+        ResourceError: If there are issues with fonts or other resources.
+        DocuForgeError: Base exception for any other errors in the PDF generation process.
         
     Example:
         >>> from docuforge import generate_pdf
@@ -61,7 +70,12 @@ def generate_pdf(data: Union[Dict[str, Any], DocumentData], engine: str = "repor
             logger.debug(f"Document title: {getattr(doc, 'title', 'Untitled')}")
         else:
             logger.error(f"Invalid input type: {type(data).__name__}")
-            raise TypeError("Input must be dict or DocumentData")
+            raise ValidationError(
+                message="Invalid input data type",
+                field="data",
+                value=type(data).__name__,
+                expected="dict or DocumentData"
+            )
             
         # For now, only support ReportLab
         engine_obj = ReportLabEngine()
