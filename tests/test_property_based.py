@@ -6,8 +6,8 @@ import pytest
 from hypothesis import given, strategies as st, settings, note
 from pypdf import PdfReader
 from docuforge import generate_pdf
-from docuforge.models import DocumentData
-from docuforge.exceptions import ValidationError
+from docuforge.core.models import DocumentData
+from docuforge.core.exceptions import ValidationError
 
 
 # Define strategies for generating document data components

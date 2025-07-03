@@ -28,6 +28,7 @@ class Section:
     items: Optional[List[str]] = None  # List items for bullet/numbered lists
     data: Dict[str, Any] = field(default_factory=dict)  # Additional metadata or styling information
     fragment_id: Optional[str] = None  # ID of a document fragment for type="fragment"
+    level: Optional[int] = None  # Level for headers (h1, h2, h3, etc.)
     
     def __post_init__(self):
         if self.type not in ALLOWED_SECTION_TYPES:

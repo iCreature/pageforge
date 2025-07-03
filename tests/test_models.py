@@ -2,7 +2,7 @@
 Unit tests for docuforge.models (dataclasses, validation, edge cases).
 """
 import pytest
-from docuforge import models
+from docuforge.core import models
 
 def test_documentdata_validation_cases():
     # Valid cases

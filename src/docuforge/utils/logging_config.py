@@ -29,7 +29,7 @@ DEFAULT_CONFIG = {
         },
         'json': {
             'format': '%(asctime)s',
-            '()': 'docuforge.logging_config.JsonFormatter'
+            '()': 'docuforge.utils.logging_config.JsonFormatter'
         }
     },
     'handlers': {

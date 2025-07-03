@@ -10,9 +10,9 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 import json
 
-from .models import Section
-from .styles import TextStyle, TableStyle
-from .exceptions import ValidationError
+from ..core.models import Section
+from ..rendering.styles import TextStyle, TableStyle
+from ..core.exceptions import ValidationError
 
 
 @dataclass
@@ -36,9 +36,13 @@ class DocumentFragment:
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "sections": [s.to_dict() for s in self.sections],
+            "sections": [s.__dict__ for s in self.sections],
             "meta": self.meta
         }
+        
+    def to_json(self) -> str:
+        """Convert to JSON string."""
+        return json.dumps(self.to_dict())
     
     @classmethod
     def from_dict(cls, data: Dict) -> 'DocumentFragment':
@@ -107,6 +111,10 @@ class FragmentRegistry:
             del self.fragments[fragment_id]
             return True
         return False
+        
+    def clear(self) -> None:
+        """Clear all fragments from the registry."""
+        self.fragments.clear()
 
 
 # Global fragment registry
@@ -184,3 +192,27 @@ def create_default_fragments() -> None:
     fragment_registry.register_fragment(contact_info)
     fragment_registry.register_fragment(terms)
     fragment_registry.register_fragment(executive_summary)
+
+
+# Helper functions for working with fragments
+def register_fragment(fragment: DocumentFragment) -> None:
+    """Register a fragment in the global registry."""
+    fragment_registry.register_fragment(fragment)
+
+
+def get_fragment(fragment_id: str) -> DocumentFragment:
+    """Get a fragment from the global registry.
+    
+    Args:
+        fragment_id: The ID of the fragment to retrieve
+        
+    Returns:
+        The requested fragment
+        
+    Raises:
+        KeyError: If the fragment does not exist
+    """
+    fragment = fragment_registry.get_fragment(fragment_id)
+    if fragment is None:
+        raise KeyError(f"Fragment with ID '{fragment_id}' not found")
+    return fragment

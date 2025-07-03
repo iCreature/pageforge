@@ -13,9 +13,9 @@ import re
 import uuid
 import json
 
-from .models import DocumentData, Section, ImageData
-from .styles import DocumentStyle, DocumentStyles
-from .exceptions import ValidationError, ConfigurationError
+from ..core.models import DocumentData, Section, ImageData
+from ..rendering.styles import DocumentStyle, DocumentStyles
+from ..core.exceptions import ValidationError, ConfigurationError
 
 
 @dataclass
@@ -273,6 +273,10 @@ class TemplateRegistry:
             del self.templates[template_id]
             return True
         return False
+        
+    def clear(self) -> None:
+        """Clear all templates from the registry."""
+        self.templates.clear()
 
 
 # Global template registry
@@ -376,3 +380,27 @@ def create_default_templates() -> None:
     template_registry.register_template(basic_report)
     template_registry.register_template(invoice_template)
     template_registry.register_template(business_letter)
+
+
+# Helper functions for working with templates
+def register_template(template: DocumentTemplate) -> None:
+    """Register a template in the global registry."""
+    template_registry.register_template(template)
+
+
+def get_template(template_id: str) -> DocumentTemplate:
+    """Get a template from the global registry.
+    
+    Args:
+        template_id: The ID of the template to retrieve
+        
+    Returns:
+        The requested template
+        
+    Raises:
+        KeyError: If the template does not exist
+    """
+    template = template_registry.get_template(template_id)
+    if template is None:
+        raise KeyError(f"Template with ID '{template_id}' not found")
+    return template

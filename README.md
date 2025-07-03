@@ -13,11 +13,44 @@ DocuForge is a flexible Python library for programmatically generating PDF docum
 - **Type Annotations**: Comprehensive type hints for better IDE integration and code validation.
 - **Robust Error Handling**: Standardized exception hierarchy with detailed diagnostics.
 
+## Project Structure
+
+DocuForge is organized into logical modules:
+
+```
+src/docuforge/
+├── core/                       # Core functionality
+│   ├── builder.py              # Document building functionality
+│   ├── models.py               # Data models
+│   └── exceptions.py           # Custom exceptions
+│
+├── engines/                    # PDF rendering engines
+│   ├── engine_base.py          # Abstract engine interface
+│   ├── reportlab_engine.py     # ReportLab implementation
+│   └── weasyprint_engine.py    # WeasyPrint implementation
+│
+├── rendering/                  # Rendering components
+│   ├── fonts.py                # Font handling
+│   └── styles.py               # Style definitions
+│
+├── utils/                      # Utility functions and helpers
+│   ├── config.py               # Configuration handling
+│   ├── logging_config.py       # Logging setup
+│   └── storage.py              # File/storage operations
+│
+├── templating/                 # Template system
+│   ├── fragments.py            # Document fragments
+│   ├── template.py             # Template base class
+│   └── templates.py            # Template implementation
+│
+└── __init__.py                 # Main package initialization
+```
+
 ## Quick Start
 
 ```python
 from docuforge import generate_pdf
-from docuforge.models import DocumentData, Section, ImageData
+from docuforge.core.models import DocumentData, Section, ImageData
 
 # Build your document
 sections = [

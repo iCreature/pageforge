@@ -5,17 +5,17 @@ import uuid
 import traceback
 
 try:
-    from ..models import DocumentData, Section
-    from ..logging_config import get_logger
-    from ..exceptions import (
+    from ..core.models import DocumentData, Section
+    from ..utils.logging_config import get_logger
+    from ..core.exceptions import (
         DocuForgeError, ValidationError, RenderingError,
         ResourceError, ImageError, SectionError
     )
 except ImportError:
     # For direct imports during testing
-    from docuforge.models import DocumentData, Section
-    from docuforge.logging_config import get_logger
-    from docuforge.exceptions import (
+    from docuforge.core.models import DocumentData, Section
+    from docuforge.utils.logging_config import get_logger
+    from docuforge.core.exceptions import (
         DocuForgeError, ValidationError, RenderingError,
         ResourceError, ImageError, SectionError
     )

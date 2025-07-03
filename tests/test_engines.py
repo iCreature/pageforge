@@ -6,7 +6,7 @@ from unittest import mock
 from pypdf import PdfReader
 from docuforge.engines.reportlab_engine import ReportLabEngine
 from docuforge.engines.weasyprint_engine import WeasyPrintEngine
-from docuforge.models import DocumentData
+from docuforge.core.models import DocumentData
 from docuforge.engines.engine_base import Engine, EngineRegistry
 
 def test_reportlab_engine_calls(monkeypatch, sample_data_dict):

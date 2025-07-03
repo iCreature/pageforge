@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: docuforge
+Version: 0.1.0
+Summary: A flexible PDF document generation library
+Author: DocuForge Team
+Requires-Python: >=3.8
+Requires-Dist: reportlab>=3.6.0
+Requires-Dist: pillow>=9.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-benchmark>=4.0.0; extra == "dev"
+Requires-Dist: hypothesis>=6.0.0; extra == "dev"
+Requires-Dist: pdf2image>=1.16.0; extra == "dev"
+Requires-Dist: imagehash>=4.3.0; extra == "dev"
+Requires-Dist: pypdf>=3.0.0; extra == "dev"
+Dynamic: author
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

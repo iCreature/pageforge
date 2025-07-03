@@ -3,7 +3,7 @@ Unit tests for docuforge.storage (Tigris/S3 upload, URL return, mocks).
 """
 import pytest
 from unittest import mock
-from docuforge.storage import TigrisUploader, StorageAdapter, LocalStorageAdapter, StorageRegistry
+from docuforge.utils.storage import TigrisUploader, StorageAdapter, LocalStorageAdapter, StorageRegistry
 import tempfile, os
 
 def test_upload_returns_url(monkeypatch):

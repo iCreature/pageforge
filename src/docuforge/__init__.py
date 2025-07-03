@@ -2,16 +2,16 @@ import os
 from typing import Dict, Any, Union, Optional
 
 # First, import all modules to avoid circular imports
-from .models import DocumentData
-from .builder import DocumentBuilder
+from .core.models import DocumentData
+from .core.builder import DocumentBuilder
 from .engines.reportlab_engine import ReportLabEngine
-from .exceptions import (
+from .core.exceptions import (
     DocuForgeError, ValidationError, RenderingError,
     ResourceError, ImageError, FontError, SectionError, ConfigurationError
 )
 
 # After all modules are imported, set up logging
-from .logging_config import get_logger, init_logging, TRACE_ID
+from .utils.logging_config import get_logger, init_logging, TRACE_ID
 
 # Initialize logging
 log_file = os.environ.get('DOCUFORGE_LOG_FILE', None)
@@ -49,7 +49,7 @@ def generate_pdf(data: Union[Dict[str, Any], DocumentData], engine: str = "repor
         
     Example:
         >>> from docuforge import generate_pdf
-        >>> from docuforge.models import Section
+        >>> from docuforge.core.models import Section
         >>> doc_data = {"title": "My Document", "sections": [Section(type="paragraph", text="Hello world")]}
         >>> pdf_bytes = generate_pdf(doc_data)
         >>> with open("output.pdf", "wb") as f:
