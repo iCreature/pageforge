@@ -51,23 +51,38 @@ class DocumentTemplate:
     """
     id: str = field(default_factory=lambda: str(uuid.uuid4()))  # Unique identifier
     name: str = "Untitled Template"  # Human-readable template name
+    title: str = ""  # Template title with potential placeholders
     description: str = ""  # Description of the template
     document: DocumentData = None  # Base document structure with placeholders
     style: DocumentStyle = field(default_factory=DocumentStyles.default)  # Default document style
-    placeholders: Dict[str, TemplatePlaceholder] = field(default_factory=dict)  # Available placeholders
+    sections: List[Section] = field(default_factory=list)  # Content sections
+    placeholders: List[TemplatePlaceholder] = field(default_factory=list)  # Available placeholders
+    _placeholders_dict: Dict[str, TemplatePlaceholder] = field(default_factory=dict, repr=False)  # Internal placeholder mapping
     
-    def __post_init__(self):
-        """Validate the template and extract placeholders."""
-        if self.document is None:
-            self.document = DocumentData(title="{{title}}")
-            self.placeholders["title"] = TemplatePlaceholder(
-                name="title",
-                description="Document title",
-                default_value="Untitled Document",
-                required=True
-            )
-        else:
-            self._extract_placeholders()
+    def __init__(self, name: str, sections: List[Section] = None, placeholders: List[TemplatePlaceholder] = None, 
+                 title: str = None, description: str = "", id: str = None, style: DocumentStyle = None):
+        """Initialize a document template with the given parameters."""
+        self.id = id or str(uuid.uuid4())
+        self.name = name
+        self.description = description
+        self.sections = sections or []
+        self.placeholders = placeholders or []
+        self._placeholders_dict = {}
+        self.style = style or DocumentStyles.default()
+        
+        # Set title attribute
+        self.title = title or name
+        
+        # Create document with the title and sections
+        self.document = DocumentData(title=self.title)
+        if sections:
+            self.document.sections = copy.deepcopy(sections)
+            
+        # Build the placeholders dictionary
+        for placeholder in self.placeholders:
+            self._placeholders_dict[placeholder.name] = placeholder
+            
+        self._extract_placeholders()
     
     def _extract_placeholders(self) -> None:
         """Extract all placeholders from the document content."""
@@ -103,12 +118,14 @@ class DocumentTemplate:
         
         for match in matches:
             name = match.strip()
-            if name not in self.placeholders:
-                self.placeholders[name] = TemplatePlaceholder(
+            if name not in self._placeholders_dict:
+                placeholder = TemplatePlaceholder(
                     name=name,
                     description=f"Placeholder in {context}",
                     required=False
                 )
+                self.placeholders.append(placeholder)
+                self._placeholders_dict[name] = placeholder
     
     def fill(self, values: Dict[str, Any]) -> DocumentData:
         """
@@ -125,9 +142,9 @@ class DocumentTemplate:
         """
         # Check for required placeholders
         missing = []
-        for name, placeholder in self.placeholders.items():
-            if placeholder.required and name not in values:
-                missing.append(name)
+        for placeholder in self.placeholders:
+            if placeholder.required and placeholder.name not in values:
+                missing.append(placeholder.name)
         
         if missing:
             raise ValidationError(
@@ -138,11 +155,25 @@ class DocumentTemplate:
                 }
             )
         
-        # Create a deep copy of the document to avoid modifying the template
-        filled_doc = copy.deepcopy(self.document)
+        # Create a new document with filled values
+        filled_doc = DocumentData(title=self._fill_text(self.document.title, values))
         
-        # Fill document title
-        filled_doc.title = self._fill_text(filled_doc.title, values)
+        # Add filled sections from template
+        if self.document.sections:
+            filled_doc.sections = []
+            for section in self.document.sections:
+                filled_section = copy.deepcopy(section)
+                if filled_section.text:
+                    filled_section.text = self._fill_text(filled_section.text, values)
+                filled_doc.sections.append(filled_section)
+        # If no sections in document, try using the template's sections directly
+        elif self.sections:
+            filled_doc.sections = []
+            for section in self.sections:
+                filled_section = copy.deepcopy(section)
+                if filled_section.text:
+                    filled_section.text = self._fill_text(filled_section.text, values)
+                filled_doc.sections.append(filled_section)
         
         # Fill sections
         for section in filled_doc.sections:
@@ -176,57 +207,71 @@ class DocumentTemplate:
             name = match.group(1).strip()
             if name in values:
                 return str(values[name])
-            elif name in self.placeholders and self.placeholders[name].default_value is not None:
-                return str(self.placeholders[name].default_value)
+            elif name in self._placeholders_dict and self._placeholders_dict[name].default_value is not None:
+                return str(self._placeholders_dict[name].default_value)
             else:
                 return match.group(0)  # Keep placeholder if no value available
         
         return re.sub(pattern, replace_match, text)
     
     def to_dict(self) -> Dict:
-        """Convert to dictionary for JSON serialization."""
+        """Convert template to dictionary for serialization."""
         return {
             "id": self.id,
             "name": self.name,
+            "title": self.title,
             "description": self.description,
-            "document": self.document.to_dict() if self.document else None,
-            "style": self.style.to_dict(),
-            "placeholders": {name: p.to_dict() for name, p in self.placeholders.items()}
+            "sections": [section.__dict__ for section in self.sections],
+            "placeholders": [placeholder.to_dict() for placeholder in self.placeholders],
+            "style": self.style.to_dict() if self.style else None
         }
+    
+    def to_json(self) -> str:
+        """Convert template to JSON string."""
+        return json.dumps(self.to_dict())
     
     @classmethod
     def from_dict(cls, data: Dict) -> 'DocumentTemplate':
         """Create a template from a dictionary representation."""
-        # Deserialize document data
-        document_data = data.get("document")
-        document = None
-        if document_data:
-            document = DocumentData(
-                title=document_data.get("title", ""),
-                sections=[Section(**s) for s in document_data.get("sections", [])],
-                images=[],  # Images need to be handled separately due to binary data
-                meta=document_data.get("meta", {})
+        # Parse sections
+        sections = []
+        for section_data in data.get("sections", []):
+            section = Section(
+                type=section_data.get("type"),
+                rows=section_data.get("rows"),
+                text=section_data.get("text"),
+                items=section_data.get("items"),
+                data=section_data.get("data", {}),
+                level=section_data.get("level")
             )
+            sections.append(section)
         
-        # Create template instance
-        template = cls(
-            id=data.get("id", str(uuid.uuid4())),
+        # Parse placeholders
+        placeholders = []
+        for ph_data in data.get("placeholders", []):
+            placeholder = TemplatePlaceholder(
+                name=ph_data.get("name", ""),
+                description=ph_data.get("description", ""),
+                default_value=ph_data.get("default_value"),
+                required=ph_data.get("required", False)
+            )
+            placeholders.append(placeholder)
+        
+        # Create the template
+        return cls(
+            id=data.get("id"),
             name=data.get("name", "Untitled Template"),
+            title=data.get("title"),
             description=data.get("description", ""),
-            document=document
+            sections=sections,
+            placeholders=placeholders
         )
-        
-        # Add placeholder definitions if provided
-        placeholders_data = data.get("placeholders", {})
-        for name, p_data in placeholders_data.items():
-            template.placeholders[name] = TemplatePlaceholder(
-                name=name,
-                description=p_data.get("description", ""),
-                default_value=p_data.get("default_value"),
-                required=p_data.get("required", False)
-            )
-        
-        return template
+    
+    @classmethod
+    def from_json(cls, json_str: str) -> 'DocumentTemplate':
+        """Create a template from a JSON string."""
+        data = json.loads(json_str) if isinstance(json_str, str) else json_str
+        return cls.from_dict(data)
     
     def save(self, file_path: str) -> None:
         """Save the template to a JSON file."""
@@ -256,9 +301,25 @@ class TemplateRegistry:
         """Register a template in the registry."""
         self.templates[template.id] = template
     
-    def get_template(self, template_id: str) -> Optional[DocumentTemplate]:
-        """Get a template by its ID."""
-        return self.templates.get(template_id)
+    def get_template(self, template_id_or_name: str) -> Optional[DocumentTemplate]:
+        """Get a template by its ID or name.
+        
+        Args:
+            template_id_or_name: The ID or name of the template to retrieve
+            
+        Returns:
+            The template with the given ID or name, or None if not found
+        """
+        # First try by ID
+        if template_id_or_name in self.templates:
+            return self.templates[template_id_or_name]
+            
+        # Then try by name
+        for template in self.templates.values():
+            if template.name == template_id_or_name:
+                return template
+                
+        return None
     
     def list_templates(self) -> List[Dict[str, str]]:
         """List all registered templates with basic metadata."""
@@ -388,11 +449,11 @@ def register_template(template: DocumentTemplate) -> None:
     template_registry.register_template(template)
 
 
-def get_template(template_id: str) -> DocumentTemplate:
-    """Get a template from the global registry.
+def get_template(template_id_or_name: str) -> DocumentTemplate:
+    """Get a template from the global registry by ID or name.
     
     Args:
-        template_id: The ID of the template to retrieve
+        template_id_or_name: The ID or name of the template to retrieve
         
     Returns:
         The requested template
@@ -400,7 +461,7 @@ def get_template(template_id: str) -> DocumentTemplate:
     Raises:
         KeyError: If the template does not exist
     """
-    template = template_registry.get_template(template_id)
+    template = template_registry.get_template(template_id_or_name)
     if template is None:
-        raise KeyError(f"Template with ID '{template_id}' not found")
+        raise KeyError(f"Template with ID or name '{template_id_or_name}' not found")
     return template

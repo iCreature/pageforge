@@ -6,7 +6,7 @@ import uuid
 SUPPORTED_IMAGE_FORMATS: Set[str] = {"PNG", "JPG", "JPEG"}
 
 # Allowed section types for document structure
-ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer", "fragment"}
+ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer", "fragment", "heading"}
 
 # Special section types with extended functionality
 SPECIAL_SECTION_TYPES: Set[str] = {"fragment", "template"}
