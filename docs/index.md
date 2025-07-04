@@ -18,6 +18,7 @@ Welcome to the DocuForge documentation. This section contains comprehensive guid
 - [Customizing Templates](guides/templates.md): Creating and using document templates
 - [Custom Rendering Engines](guides/engines.md): Implementing your own rendering engines
 - [Internationalization](guides/i18n.md): Working with international text and fonts
+- [High-Volume Optimizations](production_guide.md#high-volume-usage-optimizations): Advanced techniques for high-throughput environments
 
 ## Contributing
 
