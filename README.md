@@ -355,6 +355,19 @@ pdf_bytes = generate_pdf(doc, engine="custom")
 - Uses `pytest` and `pypdf` for robust integration tests
 - Tests verify image embedding, international text rendering, and document structure
 
+## Production Deployment
+
+For detailed guidance on deploying DocuForge in production environments, refer to our comprehensive [Production Configuration Guide](docs/production_guide.md). This guide covers:
+
+- Production installation methods
+- Configuration best practices
+- Performance optimization techniques
+- Memory management strategies
+- Security considerations
+- Monitoring and logging setup
+- Deployment architecture options
+- Troubleshooting common issues
+
 ## License
 
 MIT
