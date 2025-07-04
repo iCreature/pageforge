@@ -29,11 +29,13 @@ tests/test_benchmark.py
 tests/test_builder.py
 tests/test_custom_fonts_and_styles.py
 tests/test_engines.py
+tests/test_fragments.py
 tests/test_integration.py
 tests/test_large_images_and_stress.py
 tests/test_malformed_fields.py
 tests/test_models.py
 tests/test_property_based.py
 tests/test_storage.py
+tests/test_templates.py
 tests/test_unicode_and_rtl.py
 tests/test_visual_regression.py

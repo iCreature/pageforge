@@ -9,10 +9,15 @@ Requires-Dist: pillow>=9.0.0
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0.0; extra == "dev"
 Requires-Dist: pytest-benchmark>=4.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: pytest-lazy-fixture>=0.6.0; extra == "dev"
 Requires-Dist: hypothesis>=6.0.0; extra == "dev"
 Requires-Dist: pdf2image>=1.16.0; extra == "dev"
 Requires-Dist: imagehash>=4.3.0; extra == "dev"
 Requires-Dist: pypdf>=3.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Provides-Extra: weasyprint
+Requires-Dist: weasyprint>=54.0; extra == "weasyprint"
 Dynamic: author
 Dynamic: provides-extra
 Dynamic: requires-dist

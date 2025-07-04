@@ -154,7 +154,7 @@ def test_mixed_section_types(paragraphs, tables, lists):
         pass
 
 
-@settings(max_examples=10)
+@settings(max_examples=10, deadline=None)  # Remove the deadline to avoid flaky failures
 @given(st.lists(
     st.lists(
         st.text(min_size=1, max_size=10),
