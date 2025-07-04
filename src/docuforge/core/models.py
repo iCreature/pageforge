@@ -6,7 +6,7 @@ import uuid
 SUPPORTED_IMAGE_FORMATS: Set[str] = {"PNG", "JPG", "JPEG"}
 
 # Allowed section types for document structure
-ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer", "fragment"}
+ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer", "fragment", "heading"}
 
 # Special section types with extended functionality
 SPECIAL_SECTION_TYPES: Set[str] = {"fragment", "template"}
@@ -28,6 +28,7 @@ class Section:
     items: Optional[List[str]] = None  # List items for bullet/numbered lists
     data: Dict[str, Any] = field(default_factory=dict)  # Additional metadata or styling information
     fragment_id: Optional[str] = None  # ID of a document fragment for type="fragment"
+    level: Optional[int] = None  # Level for headers (h1, h2, h3, etc.)
     
     def __post_init__(self):
         if self.type not in ALLOWED_SECTION_TYPES:

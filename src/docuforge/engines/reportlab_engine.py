@@ -19,20 +19,20 @@ images to reach the required count.
 
 try:
     from .engine_base import Engine
-    from ..models import DocumentData
-    from ..logging_config import get_logger
-    from ..config import get_config
-    from ..exceptions import (
+    from ..core.models import DocumentData
+    from ..utils.logging_config import get_logger
+    from ..utils.config import get_config
+    from ..core.exceptions import (
         DocuForgeError, ValidationError, RenderingError,
         ResourceError, ImageError, FontError, SectionError
     )
 except ImportError:
     # For testing when imported directly
     from docuforge.engines.engine_base import Engine
-    from docuforge.models import DocumentData
-    from docuforge.logging_config import get_logger
-    from docuforge.config import get_config
-    from docuforge.exceptions import (
+    from docuforge.core.models import DocumentData
+    from docuforge.utils.logging_config import get_logger
+    from docuforge.utils.config import get_config
+    from docuforge.core.exceptions import (
         DocuForgeError, ValidationError, RenderingError,
         ResourceError, ImageError, FontError, SectionError
     )
@@ -57,11 +57,11 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
 
-from ..models import DocumentData, Section, ImageData
-from ..exceptions import DocuForgeError, ValidationError, RenderingError, ResourceError, ImageError, FontError, SectionError, ConfigurationError
+from ..core.models import DocumentData, Section, ImageData
+from ..core.exceptions import DocuForgeError, ValidationError, RenderingError, ResourceError, ImageError, FontError, SectionError, ConfigurationError
 from .engine_base import Engine
-from ..logging_config import get_logger
-from ..fonts import FontManager
+from ..utils.logging_config import get_logger
+from ..rendering.fonts import FontManager
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 

@@ -25,12 +25,12 @@ except ImportError:
 
 # Import our custom exceptions
 try:
-    from .exceptions import FontError, ResourceError
-    from .logging_config import get_logger
+    from ..core.exceptions import FontError, ResourceError
+    from ..utils.logging_config import get_logger
 except ImportError:
     # For direct imports during testing
-    from docuforge.exceptions import FontError, ResourceError
-    from docuforge.logging_config import get_logger
+    from docuforge.core.exceptions import FontError, ResourceError
+    from docuforge.utils.logging_config import get_logger
 
 # Logger setup
 logger = get_logger(__name__)

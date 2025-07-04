@@ -2,8 +2,8 @@
 Unit tests for docuforge.builder (Builder pattern, intermediate state).
 """
 import pytest
-from docuforge.builder import DocumentBuilder
-from docuforge.models import DocumentData, Section, ImageData
+from docuforge.core.builder import DocumentBuilder
+from docuforge.core.models import DocumentData, Section, ImageData
 
 def test_builder_creates_sections(sample_data_dict):
     builder = DocumentBuilder()

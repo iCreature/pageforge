@@ -1,7 +1,7 @@
 from typing import List, Union, Dict, Any, Optional
 import uuid
 from .models import DocumentData, Section, ImageData
-from .logging_config import get_logger
+from ..utils.logging_config import get_logger
 
 class DocumentBuilder:
     """

@@ -3,7 +3,7 @@ Performance benchmark tests for DocuForge.
 """
 import pytest
 from docuforge import generate_pdf
-from docuforge.models import DocumentData, Section
+from docuforge.core.models import DocumentData, Section
 import random
 import string
 

@@ -1,0 +1,4 @@
+# file: /Users/mxolisi.msweli/Desktop/projects/docuforge/src/docuforge/core/models.py
+# hypothesis_version: 6.135.23
+
+['JPEG', 'JPG', 'PNG', 'data_length', 'footer', 'format', 'fragment', 'header', 'images', 'items', 'list', 'meta', 'name', 'paragraph', 'rows', 'sections', 'style_data', 'table', 'template', 'template_id', 'template_values', 'text', 'title']

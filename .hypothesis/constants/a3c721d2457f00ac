@@ -1,0 +1,4 @@
+# file: /Users/mxolisi.msweli/Desktop/projects/docuforge/src/docuforge/utils/logging_config.py
+# hypothesis_version: 6.135.23
+
+[10485760, '%(asctime)s', '()', 'DEBUG', 'INFO', 'backupCount', 'class', 'console', 'context', 'detailed', 'docuforge', 'docuforge.log', 'exception', 'ext://sys.stdout', 'file', 'filename', 'format', 'formatter', 'formatters', 'function', 'handlers', 'json', 'level', 'line', 'logger', 'loggers', 'maxBytes', 'message', 'module', 'propagate', 'standard', 'stream', 'timestamp', 'traceback', 'type', 'version']

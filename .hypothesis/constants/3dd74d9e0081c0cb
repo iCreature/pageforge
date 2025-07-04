@@ -1,0 +1,4 @@
+# file: /Users/mxolisi.msweli/Desktop/projects/docuforge/src/docuforge/engines/weasyprint_engine.py
+# hypothesis_version: 6.135.23
+
+['<!DOCTYPE html>', '</body>', '</div>', '</head>', '</html>', '</style>', '</table>', '</td>', '</tr>', '</ul>', '<body>', '<div class="images">', '<head>', '<html>', '<style>', '<table>', '<td>', '<tr>', '<ul>', 'WeasyPrint', 'ascii', 'footer', 'header', 'image/jpeg', 'images', 'jpg', 'list', 'paragraph', 'table']

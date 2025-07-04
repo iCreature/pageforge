@@ -21,9 +21,9 @@ import time
 import uuid
 from typing import Optional, Dict, List, Any, Tuple, Union, cast
 
-from ..models import DocumentData, Section, ImageData
-from ..logging_config import get_logger
-from ..config import get_config
+from ..core.models import DocumentData, Section, ImageData
+from ..utils.logging_config import get_logger
+from ..utils.config import get_config
 from .engine_base import Engine
 
 # Conditional imports to handle environments where WeasyPrint isn't available
