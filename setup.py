@@ -1,8 +1,20 @@
 from setuptools import setup, find_packages
+import os
+import re
+
+# Read version from __init__.py
+def get_version():
+    init_path = os.path.join('src', 'docuforge', '__init__.py')
+    with open(init_path, 'r') as f:
+        version_file = f.read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 setup(
     name="docuforge",
-    version="0.1.0",
+    version=get_version(),
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=[
