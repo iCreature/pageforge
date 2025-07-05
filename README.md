@@ -370,7 +370,11 @@ For detailed guidance on deploying DocuForge in production environments, refer t
 
 ## License
 
-MIT
+DocuForge is released under the [MIT License](LICENSE).
+
+Copyright (c) 2025 Mxolisi Msweli
+
+See the [LICENSE](LICENSE) file for the full license text.
 
 ---
 
