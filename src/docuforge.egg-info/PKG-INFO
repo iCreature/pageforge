@@ -2,8 +2,23 @@ Metadata-Version: 2.4
 Name: docuforge
 Version: 0.1.0
 Summary: A flexible PDF document generation library
-Author: DocuForge Team
+Home-page: https://github.com/mxolisi-msweli/docuforge
+Author: Mxolisi Msweli
+Author-email: mxolisi.msweli@example.com
+License: MIT
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Office/Business
+Classifier: Topic :: Multimedia :: Graphics
+Classifier: Topic :: Text Processing :: Markup
 Requires-Python: >=3.8
+License-File: LICENSE
 Requires-Dist: reportlab>=3.6.0
 Requires-Dist: pillow>=9.0.0
 Provides-Extra: dev
@@ -19,6 +34,11 @@ Requires-Dist: flake8>=6.0.0; extra == "dev"
 Provides-Extra: weasyprint
 Requires-Dist: weasyprint>=54.0; extra == "weasyprint"
 Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
 Dynamic: provides-extra
 Dynamic: requires-dist
 Dynamic: requires-python
