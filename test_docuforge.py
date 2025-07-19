@@ -7,12 +7,135 @@ This script provides an API for generating documents from user messages.
 
 import os
 import json
+import base64
 import uvicorn
 from typing import Dict, List, Optional, Any
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, File, UploadFile, Form
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section
+from docuforge.core.models import DocumentData, Section, ImageData
+from docuforge.engines.reportlab_engine import ReportLabEngine
+from io import BytesIO
+from reportlab.lib.units import inch
+from reportlab.platypus import Image as RLImage
+
+# Create a custom ReportLab engine that handles a single logo properly
+class SingleLogoReportLabEngine(ReportLabEngine):
+    """
+    Custom ReportLab engine that displays a single logo in the top-right corner
+    without generating synthetic test images
+    """
+    # Set default margin if not provided
+    MARGIN = 36  # 0.5 inch in points
+    
+    def _render(self, doc: DocumentData) -> bytes:
+        """Override the default render method to handle a single logo"""
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        
+        # Create a BytesIO buffer for the PDF
+        buffer = BytesIO()
+        
+        # Create the document with standard letter size
+        document = SimpleDocTemplate(
+            buffer, 
+            pagesize=letter,
+            rightMargin=self.MARGIN,
+            leftMargin=self.MARGIN,
+            topMargin=self.MARGIN,
+            bottomMargin=self.MARGIN
+        )
+        
+        # Build story (content flow)
+        story = []
+        styles = getSampleStyleSheet()
+        
+        # Add title
+        if doc.title:
+            story.append(Paragraph(doc.title, styles['Title']))
+            story.append(Spacer(1, 12))
+        
+        # Process sections
+        for section in doc.sections:
+            stype = section.type
+            
+            # Check if section type is supported
+            if stype not in ["paragraph", "table", "list", "header", "footer"]:
+                raise ValueError(f"Unknown section type: {stype}")
+                
+            # Process section based on type
+            if stype == "paragraph":
+                story.append(Paragraph(section.text, styles['Normal']))
+                story.append(Spacer(1, 6))
+            elif stype == "header":
+                story.append(Paragraph(section.text, styles['Heading1']))
+                story.append(Spacer(1, 12))
+            elif stype == "list":
+                if hasattr(section, 'items') and section.items:
+                    for item in section.items:
+                        bullet_text = f"• {item}"
+                        story.append(Paragraph(bullet_text, styles['Normal']))
+                    story.append(Spacer(1, 6))
+            elif stype == "table":
+                if hasattr(section, 'rows') and section.rows:
+                    from reportlab.platypus import Table, TableStyle
+                    from reportlab.lib import colors
+                    
+                    table = Table(section.rows)
+                    table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ]))
+                    story.append(table)
+                    story.append(Spacer(1, 12))
+        
+        # Logo handling for first page
+        def first_page(canvas, doc):
+            canvas.saveState()
+            # Add logo if available
+            if doc.images and len(doc.images) > 0:
+                logo = doc.images[0]
+                try:
+                    # Create an in-memory image file
+                    img_data = BytesIO(logo.data)
+                    # Position logo at top-right corner
+                    img = RLImage(img_data, width=1*inch, height=0.5*inch)
+                    # Draw at the top-right corner with some padding
+                    img.drawOn(canvas, letter[0] - 1.5*inch, letter[1] - 0.75*inch)
+                except Exception as e:
+                    print(f"Error rendering logo: {e}")
+            canvas.restoreState()
+        
+        # Build the document with our custom page template
+        document.build(story, onFirstPage=first_page, onLaterPages=first_page)
+        
+        # Get the PDF bytes
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
+        
+        return pdf_bytes
+
+# Override the default generate_pdf function to use our custom engine
+original_generate_pdf = generate_pdf
+
+def custom_generate_pdf(doc: DocumentData) -> bytes:
+    """Generate a PDF using our custom single logo engine"""
+    print("Using custom PDF generator with logo support")
+    # Use our custom engine
+    engine = SingleLogoReportLabEngine()
+    result = engine._render(doc)
+    print(f"Generated PDF: {len(result)} bytes")
+    return result
+
+# Replace the default generate_pdf with our custom version
+generate_pdf = custom_generate_pdf
 
 # Create FastAPI app
 app = FastAPI(title="DocuForge AI Agent", description="AI document generation agent using DocuForge")
@@ -25,7 +148,9 @@ class DocumentRequest(BaseModel):
     table_data: Optional[List[List[str]]] = None
     include_list: bool = False
     list_items: Optional[List[str]] = None
-    author: Optional[str] = "AI Agent User"
+    author: str = "DocuForge User"
+    include_logo: bool = False
+    logo_data: Optional[str] = None  # Base64 encoded image data
 
 class DocumentResponse(BaseModel):
     """Response model with document information"""
@@ -46,7 +171,7 @@ def process_content(content: str) -> List[Section]:
     return sections
 
 @app.post("/generate-document", response_model=DocumentResponse)
-async def generate_document(request: DocumentRequest = Body(...)):
+def generate_document(request: DocumentRequest = Body(...)) -> DocumentResponse:
     """Generate a document based on user input"""
     try:
         # Start with content sections
@@ -69,9 +194,25 @@ async def generate_document(request: DocumentRequest = Body(...)):
         ))
         
         # Create document
+        images = []
+        if request.include_logo and request.logo_data:
+            try:
+                # Decode base64 image data
+                logo_bytes = base64.b64decode(request.logo_data)
+                # Create image data object
+                logo = ImageData(
+                    name="logo",
+                    data=logo_bytes,
+                    format="PNG"  # Assuming PNG format, adjust as needed
+                )
+                images.append(logo)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Invalid logo data: {str(e)}")
+        
         doc = DocumentData(
             title=request.title,
-            sections=sections
+            sections=sections,
+            images=images
         )
         
         # Generate PDF
@@ -100,6 +241,46 @@ async def root():
         "message": "Welcome to DocuForge AI Document Agent",
         "usage": "Send a POST request to /generate-document with title and content"
     }
+
+@app.post("/generate-document-with-file")
+async def generate_document_with_file(
+    title: str = Form(...),
+    content: str = Form(...),
+    include_list: bool = Form(False),
+    list_items: str = Form(""),
+    include_table: bool = Form(False),
+    table_data: str = Form(""),
+    author: str = Form("DocuForge User"),
+    logo: Optional[UploadFile] = File(None)
+):
+    """Generate a PDF document with an optional logo file upload"""
+    
+    # Prepare the request
+    request = DocumentRequest(
+        title=title,
+        content=content,
+        include_list=include_list,
+        list_items=list_items.split(",") if list_items else None,
+        include_table=include_table,
+        table_data=[row.split(",") for row in table_data.split("\n") if row] if table_data else None,
+        author=author,
+        include_logo=logo is not None
+    )
+    
+    # Handle logo if provided
+    if logo:
+        contents = await logo.read()
+        request.logo_data = base64.b64encode(contents).decode('utf-8')
+    
+    # Generate the document
+    result = generate_document(request)
+    
+    # Return the file directly
+    return FileResponse(
+        path=result.filename,
+        media_type="application/pdf",
+        filename=result.filename
+    )
 
 def main():
     """Run the API server"""
@@ -154,6 +335,18 @@ if __name__ == "__main__":
                     break
                 table_data.append([cell.strip() for cell in row.split(",")])
         
+        include_logo = input("Include a logo? (y/n): ").lower() == 'y'
+        logo_data = None
+        if include_logo:
+            logo_path = input("Enter logo file path: ")
+            try:
+                with open(logo_path, "rb") as f:
+                    logo_bytes = f.read()
+                    logo_data = base64.b64encode(logo_bytes).decode('utf-8')
+            except Exception as e:
+                print(f"Error reading logo file: {e}")
+                include_logo = False
+        
         author = input("Author name (press Enter for default): ")
         
         request = DocumentRequest(
@@ -163,7 +356,9 @@ if __name__ == "__main__":
             list_items=list_items if include_list else None,
             include_table=include_table,
             table_data=table_data if include_table else None,
-            author=author if author else "AI Agent User"
+            author=author if author else "DocuForge User",
+            include_logo=include_logo,
+            logo_data=logo_data if include_logo else None
         )
         
         # Create document
