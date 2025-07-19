@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docuforge"
+version = "0.1.0"
+description = "AI-powered document generation system with logo placement and page numbering"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "DocuForge Team", email = "mxolisi1025@gmail.com"}
+]
+maintainers = [
+    {name = "DocuForge Team", email = "mxolisi1025@gmail.com"}
+]
+keywords = ["pdf", "document", "generation", "reportlab", "invoice"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Markup",
+]
+
+dependencies = [
+    "reportlab>=3.6.0",
+    "fastapi>=0.95.0",
+    "uvicorn>=0.17.0",
+    "pydantic>=1.9.0",
+    "python-multipart>=0.0.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+docs = [
+    "sphinx>=6.0.0,<7.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "sphinx-autodoc-typehints>=1.23.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/iCreature/docuforge"
+"Bug Tracker" = "https://github.com/iCreature/docuforge/issues"
+"Documentation" = "https://docuforge.readthedocs.io/"
+"Source Code" = "https://github.com/iCreature/docuforge"
+
+[project.scripts]
+docuforge = "docuforge.cli:main"
+
+[tool.setuptools]
+packages = ["docuforge"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+docuforge = ["py.typed", "*.pyi"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = ["reportlab.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--cov=src/docuforge --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/docuforge"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
