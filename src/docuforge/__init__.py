@@ -1,10 +1,22 @@
-__version__ = "0.1.0"
+"""DocuForge: Flexible, extensible PDF/document generation library for LLM & programmatic pipelines."""
+
+from importlib.metadata import version as _pkg_version
+
+try:
+    __version__ = _pkg_version("docuforge")
+except ImportError:
+    # Package is not installed
+    __version__ = "0.0.0.dev0"
 
 import os
-from typing import Dict, Any, Union, Optional
+import logging
+from typing import Dict, Any, Union, Optional, List
 
-# First, import all modules to avoid circular imports
-from .core.models import DocumentData
+# Set up package-level logger
+logger = logging.getLogger("docuforge")
+
+# Import all public API modules and components
+from .core.models import DocumentData, Section, ImageData
 from .core.builder import DocumentBuilder
 from .engines.reportlab_engine import ReportLabEngine
 from .core.exceptions import (
@@ -12,12 +24,29 @@ from .core.exceptions import (
     ResourceError, ImageError, FontError, SectionError, ConfigurationError
 )
 
-# After all modules are imported, set up logging
+# Convenience functions for the public API
+from .api import generate_pdf, generate_pdf_with_logo
+
+# Setup logging only if an environment variable is explicitly set
 from .utils.logging_config import get_logger, init_logging, TRACE_ID
 
-# Initialize logging
-log_file = os.environ.get('DOCUFORGE_LOG_FILE', None)
-init_logging(log_file=log_file)
+if os.environ.get('DOCUFORGE_CONFIGURE_LOGGING', 'false').lower() == 'true':
+    log_file = os.environ.get('DOCUFORGE_LOG_FILE', None)
+    init_logging(log_file=log_file)
+
+__all__ = [
+    # Core models
+    'DocumentData', 'Section', 'ImageData',
+    # Builders and engines
+    'DocumentBuilder', 'ReportLabEngine',
+    # Exceptions
+    'DocuForgeError', 'ValidationError', 'RenderingError',
+    'ResourceError', 'ImageError', 'FontError', 'SectionError', 'ConfigurationError',
+    # Public API functions
+    'generate_pdf', 'generate_pdf_with_logo',
+    # Utility functions
+    'get_logger', 'TRACE_ID'
+]
 
 # Create package-level logger
 logger = get_logger(__name__, {'trace_id': TRACE_ID})

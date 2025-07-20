@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# C extensions
+*.so
+
 # Distribution / packaging
 dist/
 build/
@@ -17,12 +20,22 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
-# Environments
+# Logs
+*.log
+logs/
+
+# Generated files
+*.pdf
+
+# Virtual environments
 .env
 .venv
 env/
@@ -35,6 +48,10 @@ venv.bak/
 docs/_build/
 docs/generated/
 
+# Local development settings
+.envrc
+.direnv/
+
 # IDE specific files
 .idea/
 .vscode/
@@ -44,3 +61,7 @@ docs/generated/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Benchmarks
+.benchmarks/
+
