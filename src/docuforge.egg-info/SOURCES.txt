@@ -8,6 +8,7 @@ pyproject.toml
 test_coverage.log
 .github/workflows/ci.yml
 .github/workflows/deploy-pypi.yml
+.github/workflows/release.yml
 .hypothesis/constants/054569da8f2a4cdf
 .hypothesis/constants/09d4419487fa9852
 .hypothesis/constants/0d4f5118f93766fb
@@ -105,6 +106,9 @@ docs/introduction.md
 docs/production_guide.md
 docs/requirements.txt
 docs/usage.md
+examples/llm_invoice_generator.py
+examples/minimal_invoice_generator.py
+examples/styled_invoice_generator.py
 src/docuforge/DejaVuSans.ttf
 src/docuforge/__init__.py
 src/docuforge/api.py
