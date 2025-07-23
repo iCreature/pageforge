@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, release/* ]
+    branches: [ main, staging, release/* ]
   pull_request:
-    branches: [ main, develop, release/* ]
+    branches: [ main, staging, release/* ]
 
 jobs:
   test:
@@ -39,11 +39,4 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=src/docuforge --cov-report=xml --cov-report=term-missing --cov-fail-under=80
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.xml
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          pytest --cov=src/docuforge --cov-report=term-missing --cov-fail-under=80

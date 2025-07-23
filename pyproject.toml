@@ -101,8 +101,6 @@ testpaths = ["tests"]
 line-length = 88
 select = ["E", "F", "I", "B", "UP"]
 target-version = "py39"
-addopts = "--cov=src/docuforge --cov-report=term-missing"
-testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["src/docuforge"]
