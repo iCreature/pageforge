@@ -1,13 +1,15 @@
 """
 Unit tests for docuforge.engines (engine interface, calls, mocks).
 """
-import pytest
 from unittest import mock
-from pypdf import PdfReader
-from docuforge.engines.reportlab_engine import ReportLabEngine
-from docuforge.engines.weasyprint_engine import WeasyPrintEngine
+
+import pytest
+
 from docuforge.core.models import DocumentData
 from docuforge.engines.engine_base import Engine, EngineRegistry
+from docuforge.engines.reportlab_engine import ReportLabEngine
+from docuforge.engines.weasyprint_engine import WeasyPrintEngine
+
 
 def test_reportlab_engine_calls(monkeypatch, sample_data_dict):
     engine = ReportLabEngine()

@@ -5,14 +5,12 @@ This module provides a way to create, manage, and reuse document fragments.
 Fragments are reusable pieces of content that can be included in multiple documents.
 """
 
+import json
 import uuid
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
-import json
+from typing import Any, Optional
 
 from ..core.models import Section
-from ..rendering.styles import TextStyle, TableStyle
-from ..core.exceptions import ValidationError
 
 
 @dataclass
@@ -27,10 +25,10 @@ class DocumentFragment:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))  # Unique identifier
     name: str = "Unnamed Fragment"  # Human-readable name
     description: str = ""  # Description of the fragment
-    sections: List[Section] = field(default_factory=list)  # Content sections
-    meta: Dict[str, Any] = field(default_factory=dict)  # Additional metadata
+    sections: list[Section] = field(default_factory=list)  # Content sections
+    meta: dict[str, Any] = field(default_factory=dict)  # Additional metadata
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": self.id,
@@ -51,7 +49,7 @@ class DocumentFragment:
         return cls.from_dict(data)
     
     @classmethod
-    def from_dict(cls, data: Dict) -> 'DocumentFragment':
+    def from_dict(cls, data: dict) -> 'DocumentFragment':
         """Create a fragment from a dictionary representation."""
         sections = []
         for section_data in data.get("sections", []):
@@ -82,7 +80,7 @@ class DocumentFragment:
     @classmethod
     def load(cls, file_path: str) -> 'DocumentFragment':
         """Load a fragment from a JSON file."""
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             fragment_data = json.load(f)
         return cls.from_dict(fragment_data)
 
@@ -95,7 +93,7 @@ class FragmentRegistry:
     and managing document fragments.
     """
     def __init__(self):
-        self.fragments: Dict[str, DocumentFragment] = {}
+        self.fragments: dict[str, DocumentFragment] = {}
     
     def register_fragment(self, fragment: DocumentFragment) -> None:
         """Register a fragment in the registry."""
@@ -121,7 +119,7 @@ class FragmentRegistry:
                 
         return None
     
-    def list_fragments(self) -> List[Dict[str, str]]:
+    def list_fragments(self) -> list[dict[str, str]]:
         """List all registered fragments with basic metadata."""
         return [
             {"id": f.id, "name": f.name, "description": f.description}

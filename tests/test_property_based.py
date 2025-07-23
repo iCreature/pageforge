@@ -2,11 +2,12 @@
 Property-based tests for DocuForge using Hypothesis.
 """
 import io
-import pytest
-from hypothesis import given, strategies as st, settings, note
+
+from hypothesis import given, note, settings
+from hypothesis import strategies as st
 from pypdf import PdfReader
+
 from docuforge import generate_pdf
-from docuforge.core.models import DocumentData
 from docuforge.core.exceptions import ValidationError
 
 

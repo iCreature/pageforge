@@ -1,15 +1,14 @@
-from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Any, Dict, Set, Union
-import uuid
+from dataclasses import asdict, dataclass, field
+from typing import Any, Optional
 
 # Supported image formats for embedded images
-SUPPORTED_IMAGE_FORMATS: Set[str] = {"PNG", "JPG", "JPEG"}
+SUPPORTED_IMAGE_FORMATS: set[str] = {"PNG", "JPG", "JPEG"}
 
 # Allowed section types for document structure
-ALLOWED_SECTION_TYPES: Set[str] = {"table", "paragraph", "list", "header", "footer", "fragment", "heading"}
+ALLOWED_SECTION_TYPES: set[str] = {"table", "paragraph", "list", "header", "footer", "fragment", "heading"}
 
 # Special section types with extended functionality
-SPECIAL_SECTION_TYPES: Set[str] = {"fragment", "template"}
+SPECIAL_SECTION_TYPES: set[str] = {"fragment", "template"}
 
 @dataclass
 class Section:
@@ -23,10 +22,10 @@ class Section:
     - fragment: References a reusable document fragment by ID (stored in fragment_id)
     """
     type: str  # Type of section: "table", "paragraph", "list", "header", "footer", or "fragment"
-    rows: Optional[List[List[Any]]] = None  # 2D list of data for tables, where each inner list is a row
+    rows: Optional[list[list[Any]]] = None  # 2D list of data for tables, where each inner list is a row
     text: Optional[str] = None  # Text content for paragraphs, headers, and footers
-    items: Optional[List[str]] = None  # List items for bullet/numbered lists
-    data: Dict[str, Any] = field(default_factory=dict)  # Additional metadata or styling information
+    items: Optional[list[str]] = None  # List items for bullet/numbered lists
+    data: dict[str, Any] = field(default_factory=dict)  # Additional metadata or styling information
     fragment_id: Optional[str] = None  # ID of a document fragment for type="fragment"
     level: Optional[int] = None  # Level for headers (h1, h2, h3, etc.)
     
@@ -101,12 +100,12 @@ class DocumentData:
     reuse and standardization.
     """
     title: str  # Document title that appears in the header and metadata
-    sections: List[Section] = field(default_factory=list)  # List of content sections in order of appearance
-    images: List[ImageData] = field(default_factory=list)  # Images to embed in the document
-    meta: Dict[str, Any] = field(default_factory=dict)  # Additional metadata for document properties
+    sections: list[Section] = field(default_factory=list)  # List of content sections in order of appearance
+    images: list[ImageData] = field(default_factory=list)  # Images to embed in the document
+    meta: dict[str, Any] = field(default_factory=dict)  # Additional metadata for document properties
     template_id: Optional[str] = None  # Optional template ID if this document uses a template
-    template_values: Dict[str, Any] = field(default_factory=dict)  # Values to fill in template placeholders
-    style_data: Dict[str, Any] = field(default_factory=dict)  # Document styling information
+    template_values: dict[str, Any] = field(default_factory=dict)  # Values to fill in template placeholders
+    style_data: dict[str, Any] = field(default_factory=dict)  # Document styling information
     
     def __post_init__(self):
         if not isinstance(self.sections, list):

@@ -18,52 +18,63 @@ images to reach the required count.
 """
 
 try:
-    from .engine_base import Engine
-    from ..core.models import DocumentData
-    from ..utils.logging_config import get_logger
-    from ..utils.config import get_config
     from ..core.exceptions import (
-        DocuForgeError, ValidationError, RenderingError,
-        ResourceError, ImageError, FontError, SectionError
+        DocuForgeError,
+        FontError,
+        ImageError,
+        RenderingError,
+        ResourceError,
+        SectionError,
+        ValidationError,
     )
+    from ..core.models import DocumentData
+    from ..utils.config import get_config
+    from ..utils.logging_config import get_logger
+    from .engine_base import Engine
 except ImportError:
     # For testing when imported directly
-    from docuforge.engines.engine_base import Engine
-    from docuforge.core.models import DocumentData
-    from docuforge.utils.logging_config import get_logger
-    from docuforge.utils.config import get_config
     from docuforge.core.exceptions import (
-        DocuForgeError, ValidationError, RenderingError,
-        ResourceError, ImageError, FontError, SectionError
+        FontError,
+        ImageError,
+        RenderingError,
+        ResourceError,
+        SectionError,
+        ValidationError,
     )
+    from docuforge.core.models import DocumentData
+    from docuforge.engines.engine_base import Engine
+    from docuforge.utils.config import get_config
+    from docuforge.utils.logging_config import get_logger
 
 import io
+import os
 import time
 import uuid
-import logging
-import os
-from typing import Dict, List, Optional, Union, Tuple
-from io import BytesIO
-from PIL import Image as PILImage
+from typing import Optional
 
-import reportlab
 from reportlab.lib import colors
-from reportlab.lib import pagesizes
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, ListFlowable, ListItem, Flowable
-from reportlab.lib.utils import ImageReader
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.platypus import (
+    Flowable,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
-from ..core.models import DocumentData, Section, ImageData
-from ..core.exceptions import DocuForgeError, ValidationError, RenderingError, ResourceError, ImageError, FontError, SectionError, ConfigurationError
-from .engine_base import Engine
-from ..utils.logging_config import get_logger
+from ..core.exceptions import (
+    FontError,
+    ImageError,
+    RenderingError,
+    ResourceError,
+    SectionError,
+    ValidationError,
+)
+from ..core.models import DocumentData
 from ..rendering.fonts import FontManager
-from reportlab.lib import colors
-from reportlab.pdfbase.pdfmetrics import registerFontFamily
+from ..utils.logging_config import get_logger
+from .engine_base import Engine
 
 
 # Custom Flowable for embedding images as distinct XObjects in PDFs
@@ -81,9 +92,9 @@ class ImageXObjectFlowable(Flowable):
         width (int): Total width of the flowable area
         height (int): Total height of the flowable area
     """
-    def __init__(self, image_paths: List[str]):
+    def __init__(self, image_paths: list[str]):
         Flowable.__init__(self)
-        self.image_paths: List[str] = image_paths
+        self.image_paths: list[str] = image_paths
         self.width: int = 500  # Total width of the flowable
         self.height: int = 300  # Total height of the flowable
     
@@ -594,7 +605,7 @@ class ReportLabEngine(Engine):
                     else:
                         self.logger.warning(f"Unknown section type: {stype}")
                         raise SectionError(
-                            message=f"Unknown section type",
+                            message="Unknown section type",
                             section_type=stype,
                             section_index=None,  # We don't have the index here
                             engine=self.__class__.__name__,
@@ -675,15 +686,17 @@ class ReportLabEngine(Engine):
                 Returns:
                     BytesIO object containing the image data
                 """
-                from PIL import Image as PILImage, ImageDraw
                 import random
+
+                from PIL import Image as PILImage
+                from PIL import ImageDraw
                 
                 # Generate a random test image with dimensions from config
                 # Make each one visually different to ensure unique XObjects
                 img = PILImage.new('RGB', (200, 200), color=(200+idx*20, 255-idx*30, 240))
                 draw = ImageDraw.Draw(img)
                 # Draw some random colored shapes for uniqueness
-                for i in range(3+idx):
+                for _i in range(3+idx):
                     x1 = random.randint(0, 150)
                     y1 = random.randint(0, 150)
                     x2 = x1 + random.randint(10, 50)
@@ -738,7 +751,7 @@ class ReportLabEngine(Engine):
                         img_count += 1
                         self.logger.debug(f"Prepared image {img_count} for XObject embedding (ID: {self.render_id})")
                     else:
-                        self.logger.warning(f"Image has no data, skipping")
+                        self.logger.warning("Image has no data, skipping")
                 except Exception as e:
                     # Use custom ImageError for better error reporting
                     img_error = ImageError(
@@ -876,9 +889,8 @@ class ReportLabEngine(Engine):
                     self.font_manager.register_font(font_name)
             
             # Process RTL text if needed
-            processed_text = text
             if self.font_manager.is_rtl_text(text):
-                processed_text = self.font_manager.process_rtl_text(text)
+                self.font_manager.process_rtl_text(text)
                 self.logger.debug(f"Processed RTL text (ID: {self.render_id})")
             
             # Use FontManager to determine the best font

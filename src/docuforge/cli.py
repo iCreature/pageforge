@@ -2,13 +2,13 @@
 """DocuForge CLI - Command Line Interface for DocuForge PDF generation."""
 
 import argparse
-import sys
-from pathlib import Path
-from importlib.metadata import version
 import json
+import sys
+from importlib.metadata import version
+from pathlib import Path
 
-from docuforge.core.models import DocumentData
 from docuforge.api import generate_pdf, generate_pdf_with_logo
+from docuforge.core.models import DocumentData
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
     
     if args.from_json:
         try:
-            with open(args.from_json, 'r') as f:
+            with open(args.from_json) as f:
                 data = json.load(f)
             
             # Create DocumentData from JSON
@@ -49,7 +49,7 @@ def main():
             # Generate PDF with or without logo
             if args.logo and args.logo.exists():
                 with open(args.logo, 'rb') as logo_file:
-                    logo_bytes = logo_file.read()
+                    logo_file.read()
                     pdf_bytes = generate_pdf_with_logo(
                         doc_data, 
                         logo_path=args.logo

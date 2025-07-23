@@ -8,27 +8,32 @@ except ImportError:
     # Package is not installed
     __version__ = "0.0.0.dev0"
 
-import os
 import logging
-from typing import Dict, Any, Union, Optional, List
+import os
+from typing import Any, Dict, List, Optional, Union
 
 # Set up package-level logger
 logger = logging.getLogger("docuforge")
 
 # Import all public API modules and components
-from .core.models import DocumentData, Section, ImageData
-from .core.builder import DocumentBuilder
-from .engines.reportlab_engine import ReportLabEngine
-from .core.exceptions import (
-    DocuForgeError, ValidationError, RenderingError,
-    ResourceError, ImageError, FontError, SectionError, ConfigurationError
-)
-
 # Convenience functions for the public API
 from .api import generate_pdf, generate_pdf_with_logo
+from .core.builder import DocumentBuilder
+from .core.exceptions import (
+    ConfigurationError,
+    DocuForgeError,
+    FontError,
+    ImageError,
+    RenderingError,
+    ResourceError,
+    SectionError,
+    ValidationError,
+)
+from .core.models import DocumentData, ImageData, Section
+from .engines.reportlab_engine import ReportLabEngine
 
 # Setup logging only if an environment variable is explicitly set
-from .utils.logging_config import get_logger, init_logging, TRACE_ID
+from .utils.logging_config import TRACE_ID, get_logger, init_logging
 
 if os.environ.get('DOCUFORGE_CONFIGURE_LOGGING', 'false').lower() == 'true':
     log_file = os.environ.get('DOCUFORGE_LOG_FILE', None)
@@ -52,7 +57,7 @@ __all__ = [
 logger = get_logger(__name__, {'trace_id': TRACE_ID})
 logger.info(f"DocuForge initialized with trace ID: {TRACE_ID}")
 
-def generate_pdf(data: Union[Dict[str, Any], DocumentData], engine: str = "reportlab") -> bytes:
+def generate_pdf(data: Union[dict[str, Any], DocumentData], engine: str = "reportlab") -> bytes:
     """
     Public API: Generate PDF bytes from structured data (dict or DocumentData).
     

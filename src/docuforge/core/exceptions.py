@@ -5,13 +5,13 @@ This module defines the exception hierarchy used throughout DocuForge.
 These exceptions provide standardized error handling and reporting.
 """
 
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Optional
 
 
 class DocuForgeError(Exception):
     """Base exception class for all DocuForge errors."""
     
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         """
         Initialize a DocuForge error with a message and optional details.
         
@@ -32,7 +32,7 @@ class ValidationError(DocuForgeError):
                  field: Optional[str] = None,
                  value: Optional[Any] = None,
                  expected: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a validation error with detailed information.
         
@@ -72,7 +72,7 @@ class RenderingError(DocuForgeError):
                  render_id: Optional[str] = None,
                  section_index: Optional[int] = None,
                  cause: Optional[Exception] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a rendering error with detailed information.
         
@@ -110,7 +110,7 @@ class ResourceError(DocuForgeError):
                  message: str, 
                  resource_type: Optional[str] = None,
                  resource_name: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a resource error with detailed information.
         
@@ -139,7 +139,7 @@ class ConfigurationError(DocuForgeError):
     def __init__(self, 
                  message: str, 
                  config_key: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a configuration error with detailed information.
         
@@ -166,7 +166,7 @@ class ImageError(ResourceError):
                  image_index: Optional[int] = None,
                  image_name: Optional[str] = None,
                  format: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize an image error with detailed information.
         
@@ -202,7 +202,7 @@ class FontError(ResourceError):
                  message: str, 
                  font_name: Optional[str] = None,
                  script: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a font error with detailed information.
         
@@ -236,7 +236,7 @@ class SectionError(RenderingError):
                  section_index: Optional[int] = None,
                  engine: Optional[str] = None,
                  render_id: Optional[str] = None,
-                 details: Optional[Dict[str, Any]] = None):
+                 details: Optional[dict[str, Any]] = None):
         """
         Initialize a section error with detailed information.
         

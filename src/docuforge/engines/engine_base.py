@@ -1,24 +1,31 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Union, Optional, List
 import time
-import uuid
 import traceback
+import uuid
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Union
 
 try:
+    from ..core.exceptions import (
+        DocuForgeError,
+        ImageError,
+        RenderingError,
+        ResourceError,
+        SectionError,
+        ValidationError,
+    )
     from ..core.models import DocumentData, Section
     from ..utils.logging_config import get_logger
-    from ..core.exceptions import (
-        DocuForgeError, ValidationError, RenderingError,
-        ResourceError, ImageError, SectionError
-    )
 except ImportError:
     # For direct imports during testing
-    from docuforge.core.models import DocumentData, Section
-    from docuforge.utils.logging_config import get_logger
     from docuforge.core.exceptions import (
-        DocuForgeError, ValidationError, RenderingError,
-        ResourceError, ImageError, SectionError
+        DocuForgeError,
+        ImageError,
+        RenderingError,
+        SectionError,
+        ValidationError,
     )
+    from docuforge.core.models import DocumentData
+    from docuforge.utils.logging_config import get_logger
 
 class Engine(ABC):
     """
@@ -60,13 +67,13 @@ class Engine(ABC):
         
         # Check for title
         if not hasattr(doc, "title") or not doc.title:
-            warning = f"Document has no title"
+            warning = "Document has no title"
             validation_warnings.append(warning)
             self.logger.warning(f"{warning} (ID: {render_id})")
         
         # Check for sections
         if not hasattr(doc, "sections") or not doc.sections:
-            warning = f"Document has no sections"
+            warning = "Document has no sections"
             validation_warnings.append(warning)
             self.logger.warning(f"{warning} (ID: {render_id})")
         else:
@@ -92,7 +99,7 @@ class Engine(ABC):
                 except Exception as e:
                     # Use SectionError for better error reporting
                     section_error = SectionError(
-                        message=f"Error validating section",
+                        message="Error validating section",
                         section_index=i,
                         section_type=getattr(section, "type", "unknown") if hasattr(section, "type") else "unknown",
                         engine=self.__class__.__name__,
@@ -119,7 +126,7 @@ class Engine(ABC):
                 except Exception as e:
                     # Use ImageError for better error reporting
                     img_error = ImageError(
-                        message=f"Error validating image",
+                        message="Error validating image",
                         image_index=i,
                         image_name=getattr(img, "name", f"unnamed_image_{i}"),
                         format=getattr(img, "format", "unknown"),
@@ -152,7 +159,7 @@ class Engine(ABC):
         """
         raise NotImplementedError(f"Engine {self.__class__.__name__} must implement _render method")
 
-    def render(self, doc_or_dict: Union[Dict[str, Any], DocumentData]) -> bytes:
+    def render(self, doc_or_dict: Union[dict[str, Any], DocumentData]) -> bytes:
         """
         Public render method that converts input data to DocumentData and renders it to PDF.
         
@@ -256,7 +263,7 @@ class Engine(ABC):
             if not isinstance(out, bytes):
                 self.logger.error(f"Engine returned {type(out).__name__}, expected bytes (ID: {render_id})")
                 raise ValidationError(
-                    message=f"Engine output validation failed",
+                    message="Engine output validation failed",
                     field="output",
                     value=type(out).__name__,
                     expected="bytes",
@@ -272,7 +279,7 @@ class Engine(ABC):
                 
             # Only do PDF signature check for production engines, not test engines
             if not self.__class__.__name__.startswith(('Dummy', 'Mock', 'Test')) and \
-               not out.startswith(b'%PDF') and not b'%PDF' in out[:200]:
+               not out.startswith(b'%PDF') and b'%PDF' not in out[:200]:
                 self.logger.warning(f"Generated content does not have PDF signature (ID: {render_id})")
                 # Log warning but don't fail - some test engines may return dummy content
                 
@@ -307,7 +314,7 @@ class EngineRegistry:
     allowing them to be looked up by name. Engines must register themselves
     with this registry to be available for use.
     """
-    _registry: Dict[str, Engine] = {}
+    _registry: dict[str, Engine] = {}
     _logger = get_logger("docuforge.engines.registry")
 
     @classmethod

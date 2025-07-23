@@ -7,13 +7,18 @@ These tests validate the functionality of document templates, including:
 - Template registry operations
 - Serializing and deserializing templates
 """
-import unittest
 import json
+import unittest
+
+from docuforge.core.models import Section
 from docuforge.templating.templates import (
-    DocumentTemplate, TemplatePlaceholder, template_registry,
-    register_template, get_template
+    DocumentTemplate,
+    TemplatePlaceholder,
+    get_template,
+    register_template,
+    template_registry,
 )
-from docuforge.core.models import Section, DocumentData
+
 
 class TestDocumentTemplates(unittest.TestCase):
     """Test cases for DocumentTemplate functionality."""

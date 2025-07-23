@@ -7,15 +7,15 @@ styling, and static content of documents, while placeholders allow for dynamic c
 """
 
 import copy
-from dataclasses import dataclass, field, replace
-from typing import Any, Dict, List, Optional, Set, Union
+import json
 import re
 import uuid
-import json
+from dataclasses import dataclass, field
+from typing import Any, Optional
 
-from ..core.models import DocumentData, Section, ImageData
+from ..core.exceptions import ValidationError
+from ..core.models import DocumentData, Section
 from ..rendering.styles import DocumentStyle, DocumentStyles
-from ..core.exceptions import ValidationError, ConfigurationError
 
 
 @dataclass
@@ -31,7 +31,7 @@ class TemplatePlaceholder:
     default_value: Optional[Any] = None  # Default value if none provided
     required: bool = False  # Whether this placeholder must be filled
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "name": self.name,
@@ -55,11 +55,11 @@ class DocumentTemplate:
     description: str = ""  # Description of the template
     document: DocumentData = None  # Base document structure with placeholders
     style: DocumentStyle = field(default_factory=DocumentStyles.default)  # Default document style
-    sections: List[Section] = field(default_factory=list)  # Content sections
-    placeholders: List[TemplatePlaceholder] = field(default_factory=list)  # Available placeholders
-    _placeholders_dict: Dict[str, TemplatePlaceholder] = field(default_factory=dict, repr=False)  # Internal placeholder mapping
+    sections: list[Section] = field(default_factory=list)  # Content sections
+    placeholders: list[TemplatePlaceholder] = field(default_factory=list)  # Available placeholders
+    _placeholders_dict: dict[str, TemplatePlaceholder] = field(default_factory=dict, repr=False)  # Internal placeholder mapping
     
-    def __init__(self, name: str, sections: List[Section] = None, placeholders: List[TemplatePlaceholder] = None, 
+    def __init__(self, name: str, sections: list[Section] = None, placeholders: list[TemplatePlaceholder] = None, 
                  title: str = None, description: str = "", id: str = None, style: DocumentStyle = None):
         """Initialize a document template with the given parameters."""
         self.id = id or str(uuid.uuid4())
@@ -127,7 +127,7 @@ class DocumentTemplate:
                 self.placeholders.append(placeholder)
                 self._placeholders_dict[name] = placeholder
     
-    def fill(self, values: Dict[str, Any]) -> DocumentData:
+    def fill(self, values: dict[str, Any]) -> DocumentData:
         """
         Fill the template with provided values and return a complete DocumentData object.
         
@@ -195,7 +195,7 @@ class DocumentTemplate:
         
         return filled_doc
     
-    def _fill_text(self, text: str, values: Dict[str, Any]) -> str:
+    def _fill_text(self, text: str, values: dict[str, Any]) -> str:
         """Replace placeholders in text with their values."""
         if not isinstance(text, str):
             return text
@@ -214,7 +214,7 @@ class DocumentTemplate:
         
         return re.sub(pattern, replace_match, text)
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert template to dictionary for serialization."""
         return {
             "id": self.id,
@@ -231,7 +231,7 @@ class DocumentTemplate:
         return json.dumps(self.to_dict())
     
     @classmethod
-    def from_dict(cls, data: Dict) -> 'DocumentTemplate':
+    def from_dict(cls, data: dict) -> 'DocumentTemplate':
         """Create a template from a dictionary representation."""
         # Parse sections
         sections = []
@@ -282,7 +282,7 @@ class DocumentTemplate:
     @classmethod
     def load(cls, file_path: str) -> 'DocumentTemplate':
         """Load a template from a JSON file."""
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             template_data = json.load(f)
         return cls.from_dict(template_data)
 
@@ -295,7 +295,7 @@ class TemplateRegistry:
     and managing document templates.
     """
     def __init__(self):
-        self.templates: Dict[str, DocumentTemplate] = {}
+        self.templates: dict[str, DocumentTemplate] = {}
     
     def register_template(self, template: DocumentTemplate) -> None:
         """Register a template in the registry."""
@@ -321,7 +321,7 @@ class TemplateRegistry:
                 
         return None
     
-    def list_templates(self) -> List[Dict[str, str]]:
+    def list_templates(self) -> list[dict[str, str]]:
         """List all registered templates with basic metadata."""
         return [
             {"id": t.id, "name": t.name, "description": t.description}

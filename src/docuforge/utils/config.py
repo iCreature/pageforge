@@ -6,11 +6,11 @@ It handles loading configuration from environment variables, configuration files
 and provides sensible defaults for all parameters.
 """
 
-import os
 import json
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, Optional, List, Union
+import os
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any, Optional, Union
 
 # Default configuration values
 DEFAULT_CONFIG = {
@@ -90,14 +90,14 @@ class ImageConfig:
     max_count: int = 10
     default_width: float = 120.0
     default_height: float = 80.0
-    formats: List[str] = field(default_factory=lambda: ["png", "jpg", "jpeg"])
+    formats: list[str] = field(default_factory=lambda: ["png", "jpg", "jpeg"])
 
 
 @dataclass
 class FontsConfig:
     """Configuration for fonts"""
-    builtin: List[str] = field(default_factory=lambda: ["Helvetica", "Courier", "Times-Roman"])
-    cid: Dict[str, str] = field(default_factory=lambda: {
+    builtin: list[str] = field(default_factory=lambda: ["Helvetica", "Courier", "Times-Roman"])
+    cid: dict[str, str] = field(default_factory=lambda: {
         "japanese": "HeiseiMin-W3",
         "korean": "HYSMyeongJoStd-Medium", 
         "chinese": "STSong-Light"
@@ -108,7 +108,7 @@ class FontsConfig:
 class SecurityConfig:
     """Configuration for security settings"""
     max_content_size_mb: int = 5
-    allowed_image_formats: List[str] = field(default_factory=lambda: ["png", "jpg", "jpeg", "gif"])
+    allowed_image_formats: list[str] = field(default_factory=lambda: ["png", "jpg", "jpeg", "gif"])
     disable_external_resources: bool = True
 
 
@@ -137,7 +137,7 @@ class DocuForgeConfig:
     rendering: RenderingConfig = field(default_factory=RenderingConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert config to dictionary"""
         return asdict(self)
 
@@ -158,7 +158,7 @@ class ConfigManager:
     def __new__(cls):
         """Singleton implementation"""
         if cls._instance is None:
-            cls._instance = super(ConfigManager, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance._config = DocuForgeConfig()
             cls._instance._initialized = False
         return cls._instance
@@ -186,10 +186,10 @@ class ConfigManager:
             return int(value)
         if target_type == float:
             return float(value)
-        if target_type == list or target_type == List:
+        if target_type == list or target_type == list:
             # Parse comma-separated list
             return [item.strip() for item in value.split(",")]
-        if target_type == dict or target_type == Dict:
+        if target_type == dict or target_type == dict:
             # Parse JSON string
             return json.loads(value)
         # Default to string
@@ -226,7 +226,7 @@ class ConfigManager:
             raise FileNotFoundError(f"Configuration file not found: {filepath}")
         
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 file_config = json.load(f)
             
             # Update config with values from file
@@ -243,7 +243,7 @@ class ConfigManager:
         """Get the current configuration"""
         return self._config
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert current configuration to dictionary"""
         return self._config.to_dict()
 

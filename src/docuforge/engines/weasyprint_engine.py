@@ -16,19 +16,17 @@ This engine is currently in development and provides basic functionality.
 Note: WeasyPrint requires Cairo, Pango and GDK-PixBuf to be installed.
 """
 
-import io
 import time
 import uuid
-from typing import Optional, Dict, List, Any, Tuple, Union, cast
+from typing import Optional
 
-from ..core.models import DocumentData, Section, ImageData
-from ..utils.logging_config import get_logger
+from ..core.models import DocumentData, ImageData, Section
 from ..utils.config import get_config
 from .engine_base import Engine
 
 # Conditional imports to handle environments where WeasyPrint isn't available
 try:
-    from weasyprint import HTML, CSS
+    from weasyprint import CSS, HTML
     from weasyprint.text.fonts import FontConfiguration
     WEASYPRINT_AVAILABLE = True
 except ImportError:
@@ -169,12 +167,12 @@ class WeasyPrintEngine(Engine):
         # Process images (if any)
         if hasattr(doc, "images") and doc.images:
             html_parts.append('<div class="images">')
-            for i, image in enumerate(doc.images[:self.MAX_IMAGES]):
+            for _i, image in enumerate(doc.images[:self.MAX_IMAGES]):
                 try:
                     img_data_uri = self._image_to_data_uri(image)
-                    html_parts.append(f'<div class="image-container">')
+                    html_parts.append('<div class="image-container">')
                     html_parts.append(f'<img src="{img_data_uri}" alt="{image.name}" />')
-                    html_parts.append(f'</div>')
+                    html_parts.append('</div>')
                 except Exception as e:
                     self.logger.warning(f"Failed to process image '{image.name}': {e}")
             html_parts.append('</div>')

@@ -6,15 +6,13 @@ log levels, formatters, and handlers. It provides functions to customize logging
 based on application needs.
 """
 
+import json
 import logging
 import logging.config
-import sys
 import os
-import json
 import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional, Union
-
+from typing import Any, Optional, Union
 
 # Default logging configuration
 DEFAULT_CONFIG = {
@@ -113,7 +111,7 @@ class ContextLogger(logging.LoggerAdapter):
         return result
 
 
-def get_logger(name: str, context: Optional[Dict[str, Any]] = None) -> logging.Logger:
+def get_logger(name: str, context: Optional[dict[str, Any]] = None) -> logging.Logger:
     """
     Get a logger instance with optional context information.
     
@@ -131,7 +129,7 @@ def get_logger(name: str, context: Optional[Dict[str, Any]] = None) -> logging.L
     return logger
 
 
-def init_logging(config: Optional[Dict[str, Any]] = None, log_file: Optional[str] = None):
+def init_logging(config: Optional[dict[str, Any]] = None, log_file: Optional[str] = None):
     """
     Initialize logging with custom configuration.
     

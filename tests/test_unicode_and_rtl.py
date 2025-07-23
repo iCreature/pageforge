@@ -1,13 +1,20 @@
-import pytest
+import io
+
+from pypdf import PdfReader
+
 from docuforge import generate_pdf
 from docuforge.core.models import DocumentData, Section
-from pypdf import PdfReader
-import io
+
 
 def test_unicode_text():
     doc = DocumentData(
         title="Unicode Test",  # Simple title for consistent testing
-        sections=[Section(type="paragraph", text="Hello world – 你好，世界 – Здравствуйте, мир")],
+        sections=[
+            Section(
+                type="paragraph", 
+                text="Hello world – 你好，世界 – Здравствуйте, мир"
+            )
+        ],
         images=[]
     )
     pdf_bytes = generate_pdf(doc)

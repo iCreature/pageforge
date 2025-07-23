@@ -1,8 +1,10 @@
-import pytest
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section, ImageData
-from pypdf import PdfReader
 import io
+
+from pypdf import PdfReader
+
+from docuforge import generate_pdf
+from docuforge.core.models import DocumentData, ImageData, Section
+
 
 def make_image_bytes(size=1000):
     # Return a valid 1x1 PNG image byte string (same as fixtures)

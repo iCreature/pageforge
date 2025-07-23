@@ -7,12 +7,17 @@ These tests validate the functionality of document fragments, including:
 - Serializing and deserializing fragments
 - Fragment registry operations
 """
-import unittest
 import json
+import unittest
+
+from docuforge.core.models import Section
 from docuforge.templating.fragments import (
-    DocumentFragment, fragment_registry, register_fragment, get_fragment
+    DocumentFragment,
+    fragment_registry,
+    get_fragment,
+    register_fragment,
 )
-from docuforge.core.models import Section, DocumentData
+
 
 class TestDocumentFragments(unittest.TestCase):
     """Test cases for DocumentFragment functionality."""

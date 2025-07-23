@@ -1,7 +1,9 @@
-from typing import List, Union, Dict, Any, Optional
 import uuid
-from .models import DocumentData, Section, ImageData
+from typing import Any, Optional, Union
+
 from ..utils.logging_config import get_logger
+from .models import DocumentData, ImageData, Section
+
 
 class DocumentBuilder:
     """
@@ -21,9 +23,9 @@ class DocumentBuilder:
     """
     def __init__(self):
         self._title: Optional[str] = None
-        self._sections: List[Section] = []
-        self._images: List[ImageData] = []
-        self._meta: Dict[str, Any] = {}
+        self._sections: list[Section] = []
+        self._images: list[ImageData] = []
+        self._meta: dict[str, Any] = {}
         self.builder_id = str(uuid.uuid4())[:8]
         self.logger = get_logger("docuforge.builder", {"builder_id": self.builder_id})
         self.logger.debug(f"Created new DocumentBuilder instance (ID: {self.builder_id})")
@@ -42,7 +44,7 @@ class DocumentBuilder:
         self.logger.debug(f"Set document title: '{title}'")
         return self
 
-    def add_section(self, section: Union[Section, Dict[str, Any]]):
+    def add_section(self, section: Union[Section, dict[str, Any]]):
         """
         Add a section to the document.
         
@@ -71,7 +73,7 @@ class DocumentBuilder:
             self.logger.error(f"Error adding section: {str(e)}")
             raise
 
-    def add_sections(self, sections: List[Union[Section, Dict[str, Any]]]):
+    def add_sections(self, sections: list[Union[Section, dict[str, Any]]]):
         """
         Add multiple sections to the document.
         
@@ -87,7 +89,7 @@ class DocumentBuilder:
         self.logger.info(f"Added {len(sections)} sections (total: {len(self._sections)})")
         return self
 
-    def add_image(self, image: Union[ImageData, Dict[str, Any]]):
+    def add_image(self, image: Union[ImageData, dict[str, Any]]):
         """
         Add an image to the document.
         
@@ -117,7 +119,7 @@ class DocumentBuilder:
             self.logger.error(f"Error adding image: {str(e)}")
             raise
 
-    def add_images(self, images: List[Union[ImageData, Dict[str, Any]]]):
+    def add_images(self, images: list[Union[ImageData, dict[str, Any]]]):
         """
         Add multiple images to the document.
         
@@ -133,7 +135,7 @@ class DocumentBuilder:
         self.logger.info(f"Added {len(images)} images (total: {len(self._images)})")
         return self
 
-    def set_meta(self, meta: Dict[str, Any]):
+    def set_meta(self, meta: dict[str, Any]):
         """
         Set document metadata.
         

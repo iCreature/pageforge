@@ -7,8 +7,9 @@ across different rendering engines.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
 from enum import Enum
+from typing import Optional
+
 
 # Color definitions (RGB tuples)
 class Color:
@@ -56,10 +57,10 @@ class Border:
     Defines border properties for tables and other elements.
     """
     width: float = 1.0
-    color: Tuple[float, float, float] = Color.BLACK
+    color: tuple[float, float, float] = Color.BLACK
     style: BorderStyle = BorderStyle.SOLID
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "width": self.width,
@@ -72,17 +73,17 @@ class TableCellStyle:
     """
     Defines styling for individual table cells.
     """
-    background_color: Optional[Tuple[float, float, float]] = None
-    text_color: Tuple[float, float, float] = Color.BLACK
+    background_color: Optional[tuple[float, float, float]] = None
+    text_color: tuple[float, float, float] = Color.BLACK
     font_name: Optional[str] = None
     font_size: Optional[float] = None
     bold: bool = False
     italic: bool = False
     horizontal_alignment: HorizontalAlignment = HorizontalAlignment.LEFT
     vertical_alignment: VerticalAlignment = VerticalAlignment.MIDDLE
-    padding: Tuple[float, float, float, float] = (2, 2, 2, 2)  # left, right, top, bottom
+    padding: tuple[float, float, float, float] = (2, 2, 2, 2)  # left, right, top, bottom
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "background_color": self.background_color,
@@ -119,20 +120,20 @@ class TableStyle:
     ))
     
     # Column-specific styling
-    column_styles: Dict[int, TableCellStyle] = field(default_factory=dict)
+    column_styles: dict[int, TableCellStyle] = field(default_factory=dict)
     
     # Cell-specific styling (row, col) -> style
-    cell_styles: Dict[Tuple[int, int], TableCellStyle] = field(default_factory=dict)
+    cell_styles: dict[tuple[int, int], TableCellStyle] = field(default_factory=dict)
     
     # Table width (percentage of available width or absolute points)
     width_percentage: Optional[float] = 100  # 100% of available width by default
     width_absolute: Optional[float] = None  # If set, overrides width_percentage
     
     # Row heights
-    row_heights: Optional[List[float]] = None
+    row_heights: Optional[list[float]] = None
     
     # Column widths (percentage of table width)
-    column_widths: Optional[List[float]] = None
+    column_widths: Optional[list[float]] = None
     
     # Table alignment on page
     alignment: HorizontalAlignment = HorizontalAlignment.LEFT
@@ -141,7 +142,7 @@ class TableStyle:
     space_before: float = 6
     space_after: float = 6
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "outer_border": self.outer_border.to_dict(),
@@ -246,7 +247,7 @@ class TextStyle:
     """
     font_name: Optional[str] = None
     font_size: Optional[float] = None
-    text_color: Tuple[float, float, float] = Color.BLACK
+    text_color: tuple[float, float, float] = Color.BLACK
     alignment: HorizontalAlignment = HorizontalAlignment.LEFT
     bold: bool = False
     italic: bool = False
@@ -255,7 +256,7 @@ class TextStyle:
     space_before: float = 6
     space_after: float = 6
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "font_name": self.font_name,
@@ -315,9 +316,9 @@ class DocumentStyle:
     table_style: TableStyle = field(default_factory=TableStyles.default)
     
     # Page setup
-    page_margins: Tuple[float, float, float, float] = (72, 72, 72, 72)  # left, right, top, bottom (in points)
+    page_margins: tuple[float, float, float, float] = (72, 72, 72, 72)  # left, right, top, bottom (in points)
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "title_style": self.title_style.to_dict(),

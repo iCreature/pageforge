@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Dict
 import os
+from abc import ABC, abstractmethod
+
 
 class StorageAdapter(ABC):
     @abstractmethod
@@ -33,7 +33,7 @@ class TigrisUploader:
         raise NotImplementedError("TigrisUploader._upload must be implemented")
 
 class StorageRegistry:
-    _registry: Dict[str, StorageAdapter] = {}
+    _registry: dict[str, StorageAdapter] = {}
 
     @classmethod
     def register(cls, name: str, adapter: StorageAdapter):

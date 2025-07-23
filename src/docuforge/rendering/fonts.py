@@ -10,15 +10,12 @@ for various document rendering engines, with support for:
 """
 
 import os
-import logging
-from typing import Dict, List, Optional, Set, Tuple, Union
-from pathlib import Path
 
 # ReportLab imports
 try:
     from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    from reportlab.pdfbase.ttfonts import TTFont
     REPORTLAB_AVAILABLE = True
 except ImportError:
     REPORTLAB_AVAILABLE = False
@@ -29,7 +26,6 @@ try:
     from ..utils.logging_config import get_logger
 except ImportError:
     # For direct imports during testing
-    from docuforge.core.exceptions import FontError, ResourceError
     from docuforge.utils.logging_config import get_logger
 
 # Logger setup
@@ -86,7 +82,7 @@ class FontManager:
     """
     
     def __init__(self, 
-                 custom_font_dirs: List[str] = None,
+                 custom_font_dirs: list[str] = None,
                  default_font: str = 'Helvetica',
                  enable_rtl: bool = True):
         """
@@ -102,10 +98,10 @@ class FontManager:
         self.enable_rtl = enable_rtl
         
         # Track registered fonts
-        self.registered_fonts: Set[str] = set()
-        self.font_paths: Dict[str, str] = {}
-        self.cid_fonts: Set[str] = set()
-        self.script_fonts: Dict[str, List[str]] = {}
+        self.registered_fonts: set[str] = set()
+        self.font_paths: dict[str, str] = {}
+        self.cid_fonts: set[str] = set()
+        self.script_fonts: dict[str, list[str]] = {}
         
         # Initialize with engine-specific default fonts
         self._initialize_defaults()
@@ -123,14 +119,14 @@ class FontManager:
         # Copy initial script-to-font mappings
         self.script_fonts = SCRIPT_TO_FONT_MAP.copy()
     
-    def discover_fonts(self) -> Dict[str, str]:
+    def discover_fonts(self) -> dict[str, str]:
         """
         Discover fonts from system and custom directories.
         
         Returns:
             Dictionary mapping font family names to file paths
         """
-        discovered_fonts: Dict[str, str] = {}
+        discovered_fonts: dict[str, str] = {}
         
         # Combine system and custom directories
         search_dirs = SYSTEM_FONT_DIRS + self.custom_font_dirs
@@ -250,7 +246,7 @@ class FontManager:
             logger.warning(f"Error registering font {font_name}: {str(e)}")
             return False
     
-    def register_system_fonts(self, priority_fonts: List[str] = None) -> int:
+    def register_system_fonts(self, priority_fonts: list[str] = None) -> int:
         """
         Register available system fonts.
         

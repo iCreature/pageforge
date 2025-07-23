@@ -1,10 +1,19 @@
 """
 Unit tests for docuforge.storage (Tigris/S3 upload, URL return, mocks).
 """
-import pytest
+import os
+import tempfile
 from unittest import mock
-from docuforge.utils.storage import TigrisUploader, StorageAdapter, LocalStorageAdapter, StorageRegistry
-import tempfile, os
+
+import pytest
+
+from docuforge.utils.storage import (
+    LocalStorageAdapter,
+    StorageAdapter,
+    StorageRegistry,
+    TigrisUploader,
+)
+
 
 def test_upload_returns_url(monkeypatch):
     monkeypatch.setattr(TigrisUploader, "_upload", mock.Mock(return_value="https://fake.tigris/reports/test.pdf"))
@@ -25,7 +34,7 @@ def test_local_storage_save_and_load():
 # Error handling
 def test_local_storage_save_error():
     adapter = LocalStorageAdapter()
-    with pytest.raises(Exception):
+    with pytest.raises(OSError):
         adapter.save(b"bytes", "/bad/path/test.pdf")
 
 # Adapter interface/registry
@@ -46,6 +55,9 @@ def test_storage_interface_and_registry():
         StorageRegistry.get("none")
 
 def test_upload_handles_failure(monkeypatch):
-    monkeypatch.setattr(TigrisUploader, "_upload", mock.Mock(side_effect=Exception("fail")))
-    with pytest.raises(Exception):
+    # Mock the _upload method to fail with an exception
+    mock_failure = mock.Mock(side_effect=RuntimeError("Upload failed"))
+    monkeypatch.setattr(TigrisUploader, "_upload", mock_failure)
+    
+    with pytest.raises(RuntimeError):
         TigrisUploader.upload(b"pdfbytes", "bad.pdf")

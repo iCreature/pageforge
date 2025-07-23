@@ -7,15 +7,15 @@ Contains template and fragment handling for document generation.
 from .fragments import (
     DocumentFragment,
     fragment_registry,
-    register_fragment,
     get_fragment,
+    register_fragment,
 )
 
 # Import and expose public functions and classes from templates module
 from .templates import (
     DocumentTemplate,
     TemplatePlaceholder,
-    template_registry,
-    register_template,
     get_template,
+    register_template,
+    template_registry,
 )
