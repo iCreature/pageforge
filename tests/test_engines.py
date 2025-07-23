@@ -8,7 +8,13 @@ import pytest
 from docuforge.core.models import DocumentData
 from docuforge.engines.engine_base import Engine, EngineRegistry
 from docuforge.engines.reportlab_engine import ReportLabEngine
-from docuforge.engines.weasyprint_engine import WeasyPrintEngine
+
+# Import engine flags first to avoid module load errors
+from docuforge.engines.weasyprint_engine import WEASYPRINT_AVAILABLE
+
+# Only import the actual engine class if dependencies are available
+if WEASYPRINT_AVAILABLE:
+    from docuforge.engines.weasyprint_engine import WeasyPrintEngine
 
 
 def test_reportlab_engine_calls(monkeypatch, sample_data_dict):
@@ -27,6 +33,10 @@ def test_reportlab_engine_calls(monkeypatch, sample_data_dict):
     assert isinstance(pdf2, bytes)
 
 def test_weasyprint_engine_calls(monkeypatch, sample_data_dict):
+    # Skip this test if WeasyPrint and its dependencies aren't available
+    if not WEASYPRINT_AVAILABLE:
+        pytest.skip("WeasyPrint and/or system dependencies not available")
+        
     engine = WeasyPrintEngine()
     monkeypatch.setattr(engine, "_render", mock.Mock(return_value=b"PDFDATA2"))
     # Only use valid DocumentData fields

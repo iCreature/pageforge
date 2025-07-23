@@ -18,19 +18,34 @@ Note: WeasyPrint requires Cairo, Pango and GDK-PixBuf to be installed.
 
 import time
 import uuid
-from typing import Optional
+import warnings
+import importlib.util
+from typing import Optional, Union
 
 from ..core.models import DocumentData, ImageData, Section
 from ..utils.config import get_config
 from .engine_base import Engine
 
-# Conditional imports to handle environments where WeasyPrint isn't available
-try:
-    from weasyprint import CSS, HTML
-    from weasyprint.text.fonts import FontConfiguration
-    WEASYPRINT_AVAILABLE = True
-except ImportError:
-    WEASYPRINT_AVAILABLE = False
+# Flag to check if WeasyPrint and its system dependencies are available
+WEASYPRINT_AVAILABLE = False
+
+# Check if weasyprint module exists first
+if importlib.util.find_spec("weasyprint") is not None:
+    try:
+        # Try importing the module - this will fail if system libs are missing
+        from weasyprint import CSS, HTML
+        from weasyprint.text.fonts import FontConfiguration
+        WEASYPRINT_AVAILABLE = True
+    except (ImportError, OSError) as e:
+        warnings.warn(f"WeasyPrint is installed but system dependencies are missing: {e}")
+        # Create dummy objects to avoid import errors when the module is imported
+        # but not actually used
+        class CSS:
+            pass
+        class HTML:
+            pass
+        class FontConfiguration:
+            pass
 
 
 class WeasyPrintEngine(Engine):
