@@ -43,14 +43,15 @@ jobs:
           pytest
 
       # Only publish to Test PyPI on main branch pushes (non-tag)
+      # For TestPyPI publishing, you'll need to set up the PYPI_TEST_API_TOKEN secret in your repository settings
       - name: Publish to PyPI (Test)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
 
       - name: Test installation from TestPyPI
         run: |
-          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ docuforge
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pdfarchitect
           python -c "import docuforge; print(f'Installed version: {docuforge.__version__}')"
-          python -m docuforge.cli --version
+          pdfarchitect --version

@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "docuforge"
+name = "pdfarchitect"
 dynamic = ["version"]
 description = "Flexible, extensible PDF/document generation library for LLM & programmatic pipelines."
 readme = "README.md"
@@ -54,13 +54,13 @@ docs = [
 ]
 
 [project.scripts]
-docuforge = "docuforge.cli:main"
+pdfarchitect = "docuforge.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/iCreature/docuforge"
-Issues = "https://github.com/iCreature/docuforge/issues"
-Changelog = "https://github.com/iCreature/docuforge/blob/main/CHANGELOG.md"
-Documentation = "https://docuforge.readthedocs.io/"
+Homepage = "https://github.com/iCreature/pdfarchitect"
+Issues = "https://github.com/iCreature/pdfarchitect/issues"
+Changelog = "https://github.com/iCreature/pdfarchitect/blob/main/CHANGELOG.md"
+Documentation = "https://pdfarchitect.readthedocs.io/"
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
