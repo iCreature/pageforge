@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: docuforge
-Version: 0.1.dev39
+Version: 0.1.dev42
 Summary: Flexible, extensible PDF/document generation library for LLM & programmatic pipelines.
 Author-email: DocuForge Team <mxolisi1025@gmail.com>
 License: MIT License
