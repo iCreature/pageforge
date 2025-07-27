@@ -44,7 +44,7 @@ jobs:
 
       # Upload to PyPI
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@v1.8.11
         with:
           password: ${{ secrets.PYPI_TOKEN }}
           skip_existing: true
