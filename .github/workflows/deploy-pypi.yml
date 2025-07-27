@@ -6,9 +6,7 @@ on:
       - DF-02
   workflow_dispatch:  # Allow manual triggering
 
-# Basic permissions for repository access
-permissions:
-  contents: read   # Required to checkout the code
+# No global permissions block needed for token authentication
 
 jobs:
   deploy:
@@ -49,15 +47,13 @@ jobs:
       # Only publish to Test PyPI on main branch pushes (non-tag)
       # Using token-based authentication for TestPyPI
       - name: Publish to PyPI (Test)
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1
         with:
-          repository-url: https://test.pypi.org/legacy/
+          user: __token__
           password: ${{ secrets.PYPI_TEST_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          skip_existing: true
           verbose: true
-          skip-existing: true
-          print-hash: true
-          # Explicitly disable trusted publishing
-          use-credential-token-only: true
 
       - name: Test installation from TestPyPI
         run: |
