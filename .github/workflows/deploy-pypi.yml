@@ -6,6 +6,11 @@ on:
       - DF-02
   workflow_dispatch:  # Allow manual triggering
 
+# Add permissions needed for trusted publishing
+permissions:
+  id-token: write  # Required for PyPI trusted publishing
+  contents: read   # Required to checkout the code
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -43,12 +48,12 @@ jobs:
           pytest
 
       # Only publish to Test PyPI on main branch pushes (non-tag)
-      # For TestPyPI publishing, you'll need to set up the PYPI_TEST_API_TOKEN secret in your repository settings
+      # Using Trusted Publishing for TestPyPI
       - name: Publish to PyPI (Test)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+          # No password needed when using trusted publishing
 
       - name: Test installation from TestPyPI
         run: |

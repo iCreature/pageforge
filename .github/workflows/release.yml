@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'  # Run when version tags are pushed
 
+# Add permissions needed for trusted publishing
+permissions:
+  id-token: write  # Required for PyPI trusted publishing
+  contents: write   # Required for creating GitHub releases
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -42,7 +47,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_TOKEN }}
+          # Using trusted publishing, no password needed
           verbose: true
 
       - name: Create GitHub Release
