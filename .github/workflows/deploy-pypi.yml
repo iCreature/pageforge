@@ -48,12 +48,13 @@ jobs:
           pytest
 
       # Only publish to Test PyPI on main branch pushes (non-tag)
-      # Using Trusted Publishing for TestPyPI
+      # Using token-based authentication for TestPyPI
       - name: Publish to PyPI (Test)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          # No password needed when using trusted publishing
+          password: ${{ secrets.PYPI_TEST_TOKEN }}
+          verbose: true
 
       - name: Test installation from TestPyPI
         run: |

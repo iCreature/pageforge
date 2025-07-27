@@ -47,7 +47,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # Using trusted publishing, no password needed
+          password: ${{ secrets.PYPI_TOKEN }}
           verbose: true
 
       - name: Create GitHub Release
