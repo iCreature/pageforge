@@ -45,7 +45,7 @@ jobs:
       # Upload to PyPI using twine directly
       - name: Publish to PyPI
         env:
-          TWINE_USERNAME: __token__
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           python -m twine upload --skip-existing --verbose dist/*

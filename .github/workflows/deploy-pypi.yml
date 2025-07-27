@@ -49,7 +49,7 @@ jobs:
       - name: Publish to TestPyPI
         shell: bash
         env:
-          TWINE_USERNAME: __token__
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
           TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
         run: |
