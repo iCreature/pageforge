@@ -47,11 +47,17 @@ jobs:
       # Only publish to Test PyPI on main branch pushes (non-tag)
       # Using twine directly instead of the GitHub Action
       - name: Publish to TestPyPI
+        shell: bash
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TEST_TOKEN }}
           TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
         run: |
+          echo "Token length: ${#TWINE_PASSWORD}"
+          if [ ${#TWINE_PASSWORD} -eq 0 ]; then
+            echo "Error: PYPI_TEST_TOKEN is empty! Make sure the secret is properly set in GitHub."
+            exit 1
+          fi
           python -m twine upload --skip-existing --verbose dist/*
 
       - name: Test installation from TestPyPI
