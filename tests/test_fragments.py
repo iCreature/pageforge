@@ -1,5 +1,5 @@
 """
-Tests for the DocumentFragment feature in DocuForge.
+Tests for the DocumentFragment feature in PageForge.
 
 These tests validate the functionality of document fragments, including:
 - Creating and registering fragments
@@ -10,8 +10,8 @@ These tests validate the functionality of document fragments, including:
 import json
 import unittest
 
-from docuforge.core.models import Section
-from docuforge.templating.fragments import (
+from pageforge.core.models import Section
+from pageforge.templating.fragments import (
     DocumentFragment,
     fragment_registry,
     get_fragment,

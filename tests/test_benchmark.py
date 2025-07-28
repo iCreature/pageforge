@@ -1,12 +1,12 @@
 """
-Performance benchmark tests for DocuForge.
+Performance benchmark tests for PageForge.
 """
 import random
 import string
 
 import pytest
 
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 
 def create_test_document(paragraph_count=10, table_size=(5, 5), list_items=5):

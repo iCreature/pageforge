@@ -2,8 +2,8 @@ import io
 
 from pypdf import PdfReader
 
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, ImageData, Section
+from pageforge import generate_pdf
+from pageforge.core.models import DocumentData, ImageData, Section
 
 
 def make_image_bytes(size=1000):

@@ -5,7 +5,7 @@ import io
 
 from pypdf import PdfReader
 
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 
 def test_generate_pdf_text_sample(sample_data_dict):

@@ -1,5 +1,5 @@
 """
-Pytest fixtures for DocuForge tests.
+Pytest fixtures for PageForge tests.
 """
 import os
 import sys

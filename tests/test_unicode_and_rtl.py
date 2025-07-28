@@ -2,8 +2,8 @@ import io
 
 from pypdf import PdfReader
 
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section
+from pageforge import generate_pdf
+from pageforge.core.models import DocumentData, Section
 
 
 def test_unicode_text():

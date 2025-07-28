@@ -1,5 +1,5 @@
 """
-Unit tests for docuforge.storage (Tigris/S3 upload, URL return, mocks).
+Unit tests for pageforge.storage (Tigris/S3 upload, URL return, mocks).
 """
 import os
 import tempfile
@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from docuforge.utils.storage import (
+from pageforge.utils.storage import (
     LocalStorageAdapter,
     StorageAdapter,
     StorageRegistry,

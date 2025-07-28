@@ -1,10 +1,10 @@
 """
-Unit tests for docuforge.builder (Builder pattern, intermediate state).
+Unit tests for pageforge.builder (Builder pattern, intermediate state).
 """
 import pytest
 
-from docuforge.core.builder import DocumentBuilder
-from docuforge.core.models import DocumentData, ImageData, Section
+from pageforge.core.builder import DocumentBuilder
+from pageforge.core.models import DocumentData, ImageData, Section
 
 
 def test_builder_creates_sections(sample_data_dict):

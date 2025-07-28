@@ -2,13 +2,13 @@ import io
 
 from pypdf import PdfReader
 
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData
+from pageforge import generate_pdf
+from pageforge.core.models import DocumentData
 
 
 def test_custom_font_size(monkeypatch):
     # Monkeypatch engine to use a large font
-    from docuforge.engines import reportlab_engine
+    from pageforge.engines import reportlab_engine
     orig_render = reportlab_engine.ReportLabEngine._render
     def big_font_render(self, doc):
         import io

@@ -51,4 +51,4 @@ jobs:
           # Run tests with coverage
           # On macOS, tests using WeasyPrint will be skipped if system dependencies are missing
           # Temporarily lowered coverage threshold during modernization
-          pytest --cov=src/docuforge --cov-report=term-missing --cov-fail-under=65 || echo "Some tests failed, but CI will continue"
+          pytest --cov=src/pageforge --cov-report=term-missing --cov-fail-under=65 || echo "Some tests failed, but CI will continue"

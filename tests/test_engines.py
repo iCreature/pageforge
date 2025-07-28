@@ -1,20 +1,20 @@
 """
-Unit tests for docuforge.engines (engine interface, calls, mocks).
+Unit tests for pageforge.engines (engine interface, calls, mocks).
 """
 from unittest import mock
 
 import pytest
 
-from docuforge.core.models import DocumentData
-from docuforge.engines.engine_base import Engine, EngineRegistry
-from docuforge.engines.reportlab_engine import ReportLabEngine
+from pageforge.core.models import DocumentData
+from pageforge.engines.engine_base import Engine, EngineRegistry
+from pageforge.engines.reportlab_engine import ReportLabEngine
 
 # Import engine flags first to avoid module load errors
-from docuforge.engines.weasyprint_engine import WEASYPRINT_AVAILABLE
+from pageforge.engines.weasyprint_engine import WEASYPRINT_AVAILABLE
 
 # Only import the actual engine class if dependencies are available
 if WEASYPRINT_AVAILABLE:
-    from docuforge.engines.weasyprint_engine import WeasyPrintEngine
+    from pageforge.engines.weasyprint_engine import WeasyPrintEngine
 
 
 def test_reportlab_engine_calls(monkeypatch, sample_data_dict):

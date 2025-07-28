@@ -7,7 +7,7 @@ import imagehash
 import pytest
 from PIL import Image
 
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 # Check if pdf2image with proper dependencies is available
 PDF2IMAGE_AVAILABLE = True

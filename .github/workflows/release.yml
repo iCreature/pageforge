@@ -39,7 +39,7 @@ jobs:
       - name: Smoke test installation
         run: |
           pip install ./dist/*.whl
-          python -c "import docuforge; print(f'Installed version: {docuforge.__version__}')"
+          python -c "import pageforge; print(f'Installed version: {pageforge.__version__}')"
           pageforge --version
 
       # Upload to PyPI using twine directly
