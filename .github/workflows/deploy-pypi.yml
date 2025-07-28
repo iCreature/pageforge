@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "Token length: ${#TWINE_PASSWORD}"
           if [ ${#TWINE_PASSWORD} -eq 0 ]; then
-            echo "Error: PYPI_TEST_TOKEN is empty! Make sure the secret is properly set in GitHub."
+            echo "Error: TEST_PYPI_TOKEN is empty! Make sure the secret is properly set in GitHub."
             exit 1
           fi
           python -m twine upload --skip-existing --verbose dist/*
