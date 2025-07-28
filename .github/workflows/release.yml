@@ -3,11 +3,10 @@ name: Release to PyPI
 on:
   push:
     tags:
-      - 'v*'  # Run when version tags are pushed
+      - 'v*'
 
-# Only need permissions for GitHub releases
 permissions:
-  contents: write   # Required for creating GitHub releases
+  contents: write
 
 jobs:
   release:
@@ -16,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning with setuptools-scm
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,7 +41,6 @@ jobs:
           python -c "import pageforge; print(f'Installed version: {pageforge.__version__}')"
           pageforge --version
 
-      # Upload to PyPI using twine directly
       - name: Publish to PyPI
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

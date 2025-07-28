@@ -10,7 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
 authors = [
-    {name = "DocuForge Team", email = "mxolisi1025@gmail.com"}
+    {name = "PageForge Team", email = "mxolisi1025@gmail.com"}
 ]
 keywords = ["pdf", "document", "generation", "reportlab", "pypdf", "llm", "automation"]
 classifiers = [
@@ -54,7 +54,7 @@ docs = [
 ]
 
 [project.scripts]
-pageforge = "docuforge.cli:main"
+pageforge = "pageforge.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/iCreature/pageforge"
@@ -69,7 +69,7 @@ local_scheme = "no-local-version"
 where = ["src"]
 
 [tool.setuptools.package-data]
-docuforge = ["py.typed", "*.pyi"]
+pageforge = ["py.typed", "*.pyi"]
 
 [tool.black]
 line-length = 88
@@ -95,7 +95,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 minversion = "7.0"
 # Temporarily lowered coverage threshold during modernization
-addopts = "--cov=src/docuforge --cov-report=term-missing --cov-fail-under=65"
+addopts = "--cov=src/pageforge --cov-report=term-missing --cov-fail-under=65"
 testpaths = ["tests"]
 
 [tool.ruff]
@@ -104,7 +104,7 @@ select = ["E", "F", "I", "B", "UP"]
 target-version = "py39"
 
 [tool.coverage.run]
-source = ["src/docuforge"]
+source = ["src/pageforge"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

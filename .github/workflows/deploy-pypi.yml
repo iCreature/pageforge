@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - DF-02
-  workflow_dispatch:  # Allow manual triggering
-
-# No global permissions block needed for token authentication
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -15,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning
+          fetch-depth: 0 
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -44,8 +42,6 @@ jobs:
         run: |
           pytest
 
-      # Only publish to Test PyPI on main branch pushes (non-tag)
-      # Using twine directly instead of the GitHub Action
       - name: Publish to TestPyPI
         shell: bash
         env:
