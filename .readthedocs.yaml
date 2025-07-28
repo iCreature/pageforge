@@ -1,0 +1,45 @@
+# Read the Docs configuration file for PageForge
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Set the OS, Python version and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.12"  # Use the version that matches your development environment
+    # You can also specify Node.js or other tools if needed
+    # nodejs: "18"
+
+# Build documentation in the "docs/" directory with Sphinx
+sphinx:
+  configuration: docs/conf.py
+  # You can also specify builder options
+  # builder: html
+  # fail_on_warning: true
+
+# Optionally build your docs in additional formats such as PDF
+# formats:
+#   - pdf
+#   - epub
+
+# Optionally declare the Python requirements required to build your docs
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+    - requirements: docs/requirements.txt
+
+# Declare additional subdirectories to be built
+# submodules:
+#   include: all
+#   recursive: true
+
+# Don't build documentation for specific branches
+# branches:
+#   exclude:
+#     - /^feature-.*$/
+#     - /^hotfix-.*$/

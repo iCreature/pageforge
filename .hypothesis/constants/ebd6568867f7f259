@@ -1,0 +1,4 @@
+# file: /Users/mxolisi.msweli/Desktop/projects/docuforge/src/docuforge/exceptions.py
+# hypothesis_version: 6.135.23
+
+['cause', 'config_key', 'engine', 'expected', 'field', 'font', 'format', 'image', 'image_index', 'render_id', 'resource_name', 'resource_type', 'script', 'section_index', 'section_type', 'value']
