@@ -1,5 +1,5 @@
 """
-Document fragments module for DocuForge.
+Document fragments module for PageForge.
 
 This module provides a way to create, manage, and reuse document fragments.
 Fragments are reusable pieces of content that can be included in multiple documents.

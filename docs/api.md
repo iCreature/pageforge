@@ -1,6 +1,6 @@
 # API Reference
 
-This section provides detailed information about the DocuForge API components.
+This section provides detailed information about the PageForge API components.
 
 ## Core Models
 
@@ -217,10 +217,10 @@ class NumberedCanvas(Canvas):
 
 ```bash
 # Display help
-docuforge --help
+pageforge --help
 
 # Generate PDF
-docuforge generate --input INPUT_FILE --output OUTPUT_FILE [--logo LOGO_FILE]
+pageforge generate --input INPUT_FILE --output OUTPUT_FILE [--logo LOGO_FILE]
 ```
 
 ## API Endpoints

@@ -1,5 +1,5 @@
 """
-Document templates system for DocuForge.
+Document templates system for PageForge.
 
 This module provides a template system for document reuse, allowing users to create
 template documents that can be filled with specific content. Templates define the structure,

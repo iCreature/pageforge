@@ -1,5 +1,5 @@
 """
-Styles module for DocuForge.
+Styles module for PageForge.
 
 This module defines styling options for document elements including tables, paragraphs,
 headers, and other document components. It provides a consistent interface for styling

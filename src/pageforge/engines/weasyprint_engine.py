@@ -1,4 +1,4 @@
-"""WeasyPrint implementation of the DocuForge PDF rendering engine.
+"""WeasyPrint implementation of the PageForge PDF rendering engine.
 
 This module provides a concrete implementation of the Engine abstract class
 that uses WeasyPrint to generate PDFs from DocumentData objects. WeasyPrint is

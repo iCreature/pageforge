@@ -1,5 +1,5 @@
 """
-Property-based tests for DocuForge using Hypothesis.
+Property-based tests for PageForge using Hypothesis.
 """
 import io
 

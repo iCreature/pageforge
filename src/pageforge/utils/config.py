@@ -1,7 +1,7 @@
 """
-DocuForge Configuration Module
+PageForge Configuration Module
 
-This module provides configuration management for the DocuForge library.
+This module provides configuration management for the PageForge library.
 It handles loading configuration from environment variables, configuration files,
 and provides sensible defaults for all parameters.
 """
@@ -62,8 +62,8 @@ DEFAULT_CONFIG = {
     }
 }
 
-# Environment variable prefix for DocuForge configuration
-ENV_PREFIX = "DOCUFORGE_"
+# Environment variable prefix for PageForge configuration
+ENV_PREFIX = "PAGEFORGE_"
 
 
 @dataclass
@@ -127,8 +127,8 @@ class LoggingConfig:
 
 
 @dataclass
-class DocuForgeConfig:
-    """Main configuration class for DocuForge"""
+class PageForgeConfig:
+    """Main configuration class for PageForge"""
     page: PageConfig = field(default_factory=PageConfig)
     text: TextConfig = field(default_factory=TextConfig)
     image: ImageConfig = field(default_factory=ImageConfig)
@@ -144,7 +144,7 @@ class DocuForgeConfig:
 
 class ConfigManager:
     """
-    Configuration manager for DocuForge.
+    Configuration manager for PageForge.
     
     This class handles loading configuration from different sources
     with the following precedence:
@@ -159,7 +159,7 @@ class ConfigManager:
         """Singleton implementation"""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._config = DocuForgeConfig()
+            cls._instance._config = PageForgeConfig()
             cls._instance._initialized = False
         return cls._instance
     
@@ -239,7 +239,7 @@ class ConfigManager:
         except Exception as e:
             raise ValueError(f"Error loading configuration file: {str(e)}")
     
-    def get_config(self) -> DocuForgeConfig:
+    def get_config(self) -> PageForgeConfig:
         """Get the current configuration"""
         return self._config
     
@@ -252,12 +252,12 @@ class ConfigManager:
 _config_manager = None
 
 
-def get_config() -> DocuForgeConfig:
+def get_config() -> PageForgeConfig:
     """
     Get the global configuration instance
     
     Returns:
-        DocuForgeConfig: The current configuration
+        PageForgeConfig: The current configuration
     """
     global _config_manager
     if _config_manager is None:
@@ -276,7 +276,7 @@ def get_config() -> DocuForgeConfig:
     return _config_manager.get_config()
 
 
-def init_config(config_file: Optional[Union[str, Path]] = None) -> DocuForgeConfig:
+def init_config(config_file: Optional[Union[str, Path]] = None) -> PageForgeConfig:
     """
     Initialize configuration with optional config file
     
@@ -284,7 +284,7 @@ def init_config(config_file: Optional[Union[str, Path]] = None) -> DocuForgeConf
         config_file: Optional path to configuration file
         
     Returns:
-        DocuForgeConfig: The initialized configuration
+        PageForgeConfig: The initialized configuration
     """
     global _config_manager
     _config_manager = ConfigManager()

@@ -1,10 +1,10 @@
-# Introduction to DocuForge
+# Introduction to PageForge
 
-DocuForge is a powerful document generation library designed to create professional PDFs with consistent styling, logo placement, and proper page numbering. It's built to be easy to use while offering powerful customization options.
+PageForge is a powerful document generation library designed to create professional PDFs with consistent styling, logo placement, and proper page numbering. It's built to be easy to use while offering powerful customization options.
 
 ## Core Philosophy
 
-DocuForge is built on several key principles:
+PageForge is built on several key principles:
 
 1. **Simplicity**: Create professional documents with minimal code
 2. **Consistency**: Ensure logos, headers, and footers appear consistently across pages
@@ -15,7 +15,7 @@ DocuForge is built on several key principles:
 
 ### Single Logo Support
 
-DocuForge allows you to include a single logo image consistently positioned on every page. The current implementation supports:
+PageForge allows you to include a single logo image consistently positioned on every page. The current implementation supports:
 
 - PNG, JPG/JPEG image formats
 - Maximum file size of 2MB
@@ -31,7 +31,7 @@ Documents can include dynamic page numbering in the footer, with placeholders th
 
 ### Document Structure
 
-DocuForge supports a variety of content sections:
+PageForge supports a variety of content sections:
 
 - Headers and titles
 - Paragraphs with formatted text
@@ -47,7 +47,7 @@ DocuForge supports a variety of content sections:
 
 ## Design Principles
 
-DocuForge follows SOLID principles:
+PageForge follows SOLID principles:
 
 - **Single Responsibility**: Each class has a focused purpose
 - **Open/Closed**: Extend functionality without modifying core code

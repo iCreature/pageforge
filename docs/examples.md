@@ -1,14 +1,14 @@
 # Code Examples
 
-This page contains practical examples of using DocuForge in various scenarios.
+This page contains practical examples of using PageForge in various scenarios.
 
 ## Basic Invoice Example
 
 Create a simple invoice document:
 
 ```python
-from docuforge.core.models import DocumentData, Section
-from docuforge.engines import generate_pdf
+from pageforge.core.models import DocumentData, Section
+from pageforge.engines import generate_pdf
 
 # Define invoice data
 invoice_number = "INV-2025-0719"
@@ -75,8 +75,8 @@ with open("invoice_example.pdf", "wb") as f:
 Generate a report with a company logo:
 
 ```python
-from docuforge.core.models import DocumentData, Section, ImageData
-from docuforge.engines import generate_pdf_with_logo
+from pageforge.core.models import DocumentData, Section, ImageData
+from pageforge.engines import generate_pdf_with_logo
 import base64
 
 # Load logo from file
@@ -154,13 +154,13 @@ with open("financial_report.pdf", "wb") as f:
 
 ## LLM Integration Example
 
-This example demonstrates integrating DocuForge with an LLM to generate content:
+This example demonstrates integrating PageForge with an LLM to generate content:
 
 ```python
 import os
 import requests
-from docuforge.core.models import DocumentData, Section, ImageData
-from docuforge.engines import generate_pdf_with_logo
+from pageforge.core.models import DocumentData, Section, ImageData
+from pageforge.engines import generate_pdf_with_logo
 
 def get_llm_generated_content(prompt):
     """Get content from an LLM API based on a prompt"""
@@ -263,7 +263,7 @@ with open("llm_generated_invoice.pdf", "wb") as f:
 
 ## API Server Example
 
-This example shows how to set up and use the DocuForge API server:
+This example shows how to set up and use the PageForge API server:
 
 ```python
 # server.py
@@ -271,10 +271,10 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import Response
 import uvicorn
 import json
-from docuforge.core.models import DocumentData, Section, ImageData
-from docuforge.engines import generate_pdf, generate_pdf_with_logo
+from pageforge.core.models import DocumentData, Section, ImageData
+from pageforge.engines import generate_pdf, generate_pdf_with_logo
 
-app = FastAPI(title="DocuForge API")
+app = FastAPI(title="PageForge API")
 
 @app.post("/generate")
 async def generate_document(document: dict):

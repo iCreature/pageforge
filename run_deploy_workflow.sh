@@ -24,7 +24,7 @@ echo "===== Running type checks ====="
 mypy --no-error-summary --no-incremental --show-error-codes --pretty src/ || true
 
 echo "===== Running tests ====="
-pytest --cov=src/docuforge --cov-report=term-missing --cov-fail-under=65 || echo "Some tests failed, but workflow will continue"
+pytest --cov=src/pageforge --cov-report=term-missing --cov-fail-under=65 || echo "Some tests failed, but workflow will continue"
 
 echo "===== Workflow completed locally ====="
 echo "NOTE: The actual PyPI publishing step was skipped as it requires authentication tokens"

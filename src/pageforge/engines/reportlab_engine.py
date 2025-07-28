@@ -122,7 +122,7 @@ class ReportLabEngine(Engine):
     All rendering parameters are configurable through the configuration system.
     
     Configuration is loaded from:
-    1. Environment variables (DOCUFORGE_*)
+    1. Environment variables (PAGEFORGE_*)
     2. Configuration file
     3. Default values
     

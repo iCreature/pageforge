@@ -1,13 +1,13 @@
-# Contributing to DocuForge
+# Contributing to PageForge
 
-Thank you for your interest in contributing to DocuForge! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to PageForge! This document provides guidelines and instructions for contributing to the project.
 
 ## Development Setup
 
 1. **Fork and clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/docuforge.git
-   cd docuforge
+   git clone https://github.com/yourusername/pageforge.git
+   cd pageforge
    ```
 
 2. **Create a virtual environment**:
@@ -59,7 +59,7 @@ pytest
 For test coverage report:
 
 ```bash
-pytest --cov=src/docuforge --cov-report=term
+pytest --cov=src/pageforge --cov-report=term
 ```
 
 ### Code Style
@@ -99,7 +99,7 @@ Then open `docs/_build/html/index.html` in your browser.
 ## Release Process
 
 1. Ensure all tests pass on `develop`
-2. Update version in `src/docuforge/__init__.py`
+2. Update version in `src/pageforge/__init__.py`
 3. Update CHANGELOG.md
 4. Merge `develop` into `main`
 5. Tag the release: `git tag v0.1.0`
@@ -112,4 +112,4 @@ Please be respectful and inclusive in your interactions with other contributors.
 
 ## License
 
-By contributing to DocuForge, you agree that your contributions will be licensed under the project's MIT License.
+By contributing to PageForge, you agree that your contributions will be licensed under the project's MIT License.

@@ -1,6 +1,6 @@
-# DocuForge Production Configuration Guide
+# PageForge Production Configuration Guide
 
-This guide provides detailed instructions and best practices for deploying DocuForge in production environments. It covers configuration, optimization, security, monitoring, and resource management.
+This guide provides detailed instructions and best practices for deploying PageForge in production environments. It covers configuration, optimization, security, monitoring, and resource management.
 
 ## Table of Contents
 
@@ -17,19 +17,19 @@ This guide provides detailed instructions and best practices for deploying DocuF
 
 ### Production Installation
 
-For production deployments, install DocuForge with specific version pinning:
+For production deployments, install PageForge with specific version pinning:
 
 ```bash
 # Install core package
-pip install docuforge==0.1.0
+pip install pageforge==0.1.0
 
 # Install with WeasyPrint support if needed
-pip install docuforge[weasyprint]==0.1.0
+pip install pageforge[weasyprint]==0.1.0
 ```
 
 ### Docker Installation
 
-DocuForge can also be deployed using Docker:
+PageForge can also be deployed using Docker:
 
 ```dockerfile
 FROM python:3.9-slim
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y \
     shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
 
-# Install DocuForge
+# Install PageForge
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -58,7 +58,7 @@ CMD ["python", "your_app.py"]
 
 Example requirements.txt:
 ```
-docuforge==0.1.0
+pageforge==0.1.0
 gunicorn==20.1.0
 ```
 
@@ -66,7 +66,7 @@ gunicorn==20.1.0
 
 ### Configuration Files
 
-DocuForge supports configuration through JSON, YAML, or INI files. Create a `docuforge_config.json` file in your application root:
+PageForge supports configuration through JSON, YAML, or INI files. Create a `pageforge_config.json` file in your application root:
 
 ```json
 {
@@ -108,7 +108,7 @@ DocuForge supports configuration through JSON, YAML, or INI files. Create a `doc
   },
   "logging": {
     "level": "INFO",
-    "file": "/var/log/docuforge/docuforge.log",
+    "file": "/var/log/pageforge/pageforge.log",
     "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
   }
 }
@@ -120,32 +120,32 @@ For containerized environments, use environment variables (which take precedence
 
 ```bash
 # Page configuration
-export DOCUFORGE_PAGE_WIDTH=595
-export DOCUFORGE_PAGE_HEIGHT=842
-export DOCUFORGE_PAGE_MARGIN=72
+export PAGEFORGE_PAGE_WIDTH=595
+export PAGEFORGE_PAGE_HEIGHT=842
+export PAGEFORGE_PAGE_MARGIN=72
 
 # Text configuration
-export DOCUFORGE_TEXT_LINE_HEIGHT=14
-export DOCUFORGE_TEXT_DEFAULT_FONT=Helvetica
-export DOCUFORGE_TEXT_DEFAULT_SIZE=10
+export PAGEFORGE_TEXT_LINE_HEIGHT=14
+export PAGEFORGE_TEXT_DEFAULT_FONT=Helvetica
+export PAGEFORGE_TEXT_DEFAULT_SIZE=10
 
 # Image limits
-export DOCUFORGE_IMAGE_MAX_COUNT=10
-export DOCUFORGE_IMAGE_MAX_SIZE_MB=5
+export PAGEFORGE_IMAGE_MAX_COUNT=10
+export PAGEFORGE_IMAGE_MAX_SIZE_MB=5
 
 # Engine configuration
-export DOCUFORGE_ENGINE_DEFAULT=reportlab
-export DOCUFORGE_ENGINE_TIMEOUT_SECONDS=60
+export PAGEFORGE_ENGINE_DEFAULT=reportlab
+export PAGEFORGE_ENGINE_TIMEOUT_SECONDS=60
 
 # Cache settings
-export DOCUFORGE_CACHE_ENABLED=true
-export DOCUFORGE_CACHE_MAX_SIZE_MB=100
-export DOCUFORGE_CACHE_TTL_SECONDS=3600
+export PAGEFORGE_CACHE_ENABLED=true
+export PAGEFORGE_CACHE_MAX_SIZE_MB=100
+export PAGEFORGE_CACHE_TTL_SECONDS=3600
 
 # Logging
-export DOCUFORGE_LOG_LEVEL=INFO
-export DOCUFORGE_LOG_FILE=/var/log/docuforge/docuforge.log
-export DOCUFORGE_LOG_FORMAT="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+export PAGEFORGE_LOG_LEVEL=INFO
+export PAGEFORGE_LOG_FILE=/var/log/pageforge/pageforge.log
+export PAGEFORGE_LOG_FORMAT="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 ```
 
 ## Performance Optimization
@@ -155,7 +155,7 @@ export DOCUFORGE_LOG_FORMAT="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 Preload fonts to reduce PDF generation time:
 
 ```python
-from docuforge.rendering.fonts import preload_fonts
+from pageforge.rendering.fonts import preload_fonts
 
 # Preload common fonts at application startup
 preload_fonts(['Helvetica', 'Times-Roman', 'Courier'])
@@ -166,7 +166,7 @@ preload_fonts(['Helvetica', 'Times-Roman', 'Courier'])
 Cache templates for frequently used documents:
 
 ```python
-from docuforge.templating.templates import DocumentTemplate, TemplateRegistry
+from pageforge.templating.templates import DocumentTemplate, TemplateRegistry
 
 # Register templates at application startup
 invoice_template = DocumentTemplate.from_dict({
@@ -190,7 +190,7 @@ For high-throughput applications, use thread or process pools:
 
 ```python
 from concurrent.futures import ProcessPoolExecutor
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 # Create a process pool for parallel PDF generation
 with ProcessPoolExecutor(max_workers=4) as executor:
@@ -217,8 +217,8 @@ For environments processing thousands of documents per day, these advanced optim
 Pre-render common elements to reduce generation time:
 
 ```python
-from docuforge.core.cache import RenderCache
-from docuforge.core.models import Section
+from pageforge.core.cache import RenderCache
+from pageforge.core.models import Section
 
 # Initialize a render cache
 render_cache = RenderCache(max_size=100)
@@ -246,8 +246,8 @@ def optimized_generate_pdf(doc_data, cache=render_cache):
 Implement batched processing for more efficient resource usage:
 
 ```python
-from docuforge import generate_pdf
-from docuforge.utils.resource_monitor import ResourceMonitor
+from pageforge import generate_pdf
+from pageforge.utils.resource_monitor import ResourceMonitor
 import time
 
 def batch_processor(queue, batch_size=10, max_memory_pct=70):
@@ -293,8 +293,8 @@ def batch_processor(queue, batch_size=10, max_memory_pct=70):
 Compile document fragments ahead of time for commonly used components:
 
 ```python
-from docuforge.templating.fragments import DocumentFragment, FragmentRegistry
-from docuforge.utils.cache import LRUCache
+from pageforge.templating.fragments import DocumentFragment, FragmentRegistry
+from pageforge.utils.cache import LRUCache
 
 # Initialize fragment registry and compilation cache
 fragment_registry = FragmentRegistry.get_instance()
@@ -342,7 +342,7 @@ db_pool = psycopg2.pool.ThreadedConnectionPool(
     minconn=5,
     maxconn=20,
     host="db.example.com",
-    database="docuforge",
+    database="pageforge",
     user="user",
     password="password"
 )
@@ -564,7 +564,7 @@ Configure memory limits for PDF generation:
 
 ```python
 import resource
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 def limited_generate_pdf(doc_data):
     # Limit process to 500MB of memory
@@ -579,7 +579,7 @@ Optimize images before embedding in PDFs:
 ```python
 from PIL import Image
 from io import BytesIO
-from docuforge.core.models import DocumentData, ImageData
+from pageforge.core.models import DocumentData, ImageData
 
 def optimize_image(image_data, max_width=800, max_height=600, quality=85, format="JPEG"):
     # Load image data
@@ -611,12 +611,12 @@ doc = DocumentData(
 
 ### Input Validation
 
-Validate all input before passing to DocuForge:
+Validate all input before passing to PageForge:
 
 ```python
 import json
 import jsonschema
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 # Define a schema for document validation
 DOCUMENT_SCHEMA = {
@@ -666,7 +666,7 @@ Limit file system access during PDF generation:
 ```python
 import os
 from functools import wraps
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 def sandboxed_execution(func):
     @wraps(func)
@@ -676,7 +676,7 @@ def sandboxed_execution(func):
         
         try:
             # Change to a restricted directory
-            os.chdir('/tmp/docuforge_sandbox')
+            os.chdir('/tmp/pageforge_sandbox')
             
             # Execute the function
             result = func(*args, **kwargs)
@@ -697,13 +697,13 @@ def safe_generate_pdf(doc_data):
 
 ### Structured Logging
 
-Configure DocuForge's logging for structured output:
+Configure PageForge's logging for structured output:
 
 ```python
 import os
 import json
 import logging
-from docuforge.utils.logging_config import init_logging
+from pageforge.utils.logging_config import init_logging
 
 # Configure structured JSON logging
 class JsonFormatter(logging.Formatter):
@@ -726,7 +726,7 @@ class JsonFormatter(logging.Formatter):
 
 # Initialize with custom formatter
 def setup_production_logging():
-    log_file = os.environ.get('DOCUFORGE_LOG_FILE', '/var/log/docuforge/docuforge.log')
+    log_file = os.environ.get('PAGEFORGE_LOG_FILE', '/var/log/pageforge/pageforge.log')
     handler = logging.FileHandler(log_file)
     handler.setFormatter(JsonFormatter())
     
@@ -740,10 +740,10 @@ Collect metrics for PDF generation:
 ```python
 import time
 import statsd
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 # Initialize statsd client
-statsd_client = statsd.StatsClient('localhost', 8125, prefix='docuforge')
+statsd_client = statsd.StatsClient('localhost', 8125, prefix='pageforge')
 
 def generate_pdf_with_metrics(doc_data, doc_type="generic"):
     start_time = time.time()
@@ -770,12 +770,12 @@ def generate_pdf_with_metrics(doc_data, doc_type="generic"):
 
 ### Web Service Integration
 
-Example of integrating DocuForge with Flask:
+Example of integrating PageForge with Flask:
 
 ```python
 from flask import Flask, request, send_file, jsonify
 from io import BytesIO
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 app = Flask(__name__)
 
@@ -815,7 +815,7 @@ import pika
 import json
 import os
 import time
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 def callback(ch, method, properties, body):
     try:
@@ -830,7 +830,7 @@ def callback(ch, method, properties, body):
         pdf_bytes = generate_pdf(doc_data)
         
         # Save to storage (e.g., S3, file system, etc.)
-        output_path = f"/var/docuforge/output/{doc_id}.pdf"
+        output_path = f"/var/pageforge/output/{doc_id}.pdf"
         with open(output_path, 'wb') as f:
             f.write(pdf_bytes)
             
@@ -876,7 +876,7 @@ if __name__ == '__main__':
 If you see font-related warnings:
 
 ```
-WARNING docuforge.rendering.fonts:fonts.py:246 Font not found or invalid path: DejaVuSans, None
+WARNING pageforge.rendering.fonts:fonts.py:246 Font not found or invalid path: DejaVuSans, None
 ```
 
 Solution:
@@ -909,7 +909,7 @@ For large documents that take too long to generate:
 
 1. Increase the engine timeout:
    ```python
-   os.environ["DOCUFORGE_ENGINE_TIMEOUT_SECONDS"] = "120"
+   os.environ["PAGEFORGE_ENGINE_TIMEOUT_SECONDS"] = "120"
    ```
 2. Split large documents into multiple smaller ones
 3. Implement asynchronous generation with status updates
@@ -920,7 +920,7 @@ Enable debug logging for troubleshooting:
 
 ```python
 import logging
-from docuforge.utils.logging_config import init_logging
+from pageforge.utils.logging_config import init_logging
 
 # Initialize with debug level
 init_logging(log_level=logging.DEBUG)
@@ -929,7 +929,7 @@ init_logging(log_level=logging.DEBUG)
 Run diagnostics to check system compatibility:
 
 ```python
-from docuforge.utils.diagnostics import run_diagnostics
+from pageforge.utils.diagnostics import run_diagnostics
 
 # Check system compatibility
 diagnostics_report = run_diagnostics()
@@ -940,7 +940,7 @@ print(diagnostics_report)
 
 ## Additional Resources
 
-- [DocuForge API Documentation](https://docuforge.readthedocs.io/)
+- [PageForge API Documentation](https://pageforge.readthedocs.io/)
 - [ReportLab Documentation](https://www.reportlab.com/docs/reportlab-userguide.pdf)
 - [WeasyPrint Documentation](https://weasyprint.readthedocs.io/)
 - [PDF Performance Optimization Guide](https://example.com/pdf-optimization)

@@ -1,5 +1,5 @@
 """
-DocuForge Templating Module
+PageForge Templating Module
 Contains template and fragment handling for document generation.
 """
 

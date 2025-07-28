@@ -1,5 +1,5 @@
 """
-Visual regression tests for DocuForge.
+Visual regression tests for PageForge.
 """
 from pathlib import Path
 
