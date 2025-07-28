@@ -3,7 +3,8 @@ name: Deploy to PyPI
 on:
   push:
     branches:
-      - DF-02
+      # here you need to place the branch that you want to deploy to PyPI (test)
+      - main
   workflow_dispatch:
 
 jobs:
