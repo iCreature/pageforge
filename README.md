@@ -1,6 +1,6 @@
-# DocuForge
+# PageForge
 
-DocuForge is a flexible Python library for programmatically generating PDF documents with advanced layout, multi-section support, and extensible rendering engines. It provides type-safe APIs and full support for embedding images as XObjects in the generated PDFs.
+PageForge is a flexible Python library for programmatically generating PDF documents with advanced layout, multi-section support, and extensible rendering engines. It provides type-safe APIs and full support for embedding images as XObjects in the generated PDFs.
 
 ## Features
 - **Advanced PDF Layout**: Headers, footers, multi-page support, and automatic page breaks.
@@ -15,10 +15,10 @@ DocuForge is a flexible Python library for programmatically generating PDF docum
 
 ## Project Structure
 
-DocuForge is organized into logical modules:
+PageForge is organized into logical modules:
 
 ```
-src/docuforge/
+src/pageforge/
 ├── core/                       # Core functionality
 │   ├── builder.py              # Document building functionality
 │   ├── models.py               # Data models
@@ -49,13 +49,13 @@ src/docuforge/
 ## Quick Start
 
 ```python
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section, ImageData
+from pageforge import generate_pdf
+from pageforge.core.models import DocumentData, Section, ImageData
 
 # Build your document
 sections = [
     Section(type="header", text="My Report Header"),
-    Section(type="paragraph", text="Welcome to DocuForge!"),
+    Section(type="paragraph", text="Welcome to PageForge!"),
     Section(type="table", rows=[["Col1", "Col2"], ["A", "B"]]),
     Section(type="list", items=["First", "Second"]),
     Section(type="footer", text="Page Footer")
@@ -69,9 +69,9 @@ with open("output.pdf", "wb") as f:
     f.write(pdf_bytes)
 ```
 
-## Using DocuForge as a Dependency in LLM Apps
+## Using PageForge as a Dependency in LLM Apps
 
-DocuForge is ideal for LLM-powered workflows where an LLM generates structured document data (as JSON/dict or Python objects), and you need to produce a high-quality PDF as output.
+PageForge is ideal for LLM-powered workflows where an LLM generates structured document data (as JSON/dict or Python objects), and you need to produce a high-quality PDF as output.
 
 ### Example: LLM → PDF
 
@@ -88,11 +88,11 @@ Suppose your LLM outputs a JSON like this:
 }
 ```
 
-You can directly pass this JSON to DocuForge to generate a PDF:
+You can directly pass this JSON to PageForge to generate a PDF:
 
 ```python
 import json
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 # LLM output as JSON string
 llm_json = '{"title":"LLM Generated Report", ...}'
@@ -104,12 +104,12 @@ pdf_bytes = generate_pdf(llm_data)
 
 ## Error Handling
 
-DocuForge provides a robust exception hierarchy to help you handle different types of errors that may occur during PDF generation. All exceptions inherit from the base `DocuForgeError` class.
+PageForge provides a robust exception hierarchy to help you handle different types of errors that may occur during PDF generation. All exceptions inherit from the base `PageForgeError` class.
 
 ### Exception Hierarchy
 
 ```
-DocuForgeError
+PageForgeError
 ├── ValidationError - Input data validation issues
 ├── ConfigurationError - Configuration problems
 ├── RenderingError - PDF generation failures
@@ -122,7 +122,7 @@ DocuForgeError
 ### Handling Exceptions
 
 ```python
-from docuforge import generate_pdf, ValidationError, ImageError, RenderingError
+from pageforge import generate_pdf, ValidationError, ImageError, RenderingError
 
 try:
     pdf_bytes = generate_pdf(doc_data)
@@ -147,8 +147,8 @@ except RenderingError as e:
     if e.cause:
         print(f"Caused by: {e.cause}")
         
-except DocuForgeError as e:
-    # Catch-all for any DocuForge error
+except PageForgeError as e:
+    # Catch-all for any PageForge error
     print(f"PDF generation error: {e}")
     # All exceptions have details dictionary
     if hasattr(e, 'details') and e.details:
@@ -185,10 +185,10 @@ except DocuForgeError as e:
 }
 ```
 
-You can directly pass this dict to DocuForge:
+You can directly pass this dict to PageForge:
 
 ```python
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 llm_output = { ... }  # JSON/dict from LLM
 pdf_bytes = generate_pdf(llm_output)
@@ -198,14 +198,14 @@ with open("llm_report.pdf", "wb") as f:
 
 ### Integration Tips
 - **Flexible Input**: Accepts both dataclasses and plain dicts, making it easy to use with LLMs that output JSON.
-- **Streaming/Async**: You can wrap DocuForge calls in async tasks or APIs for real-time document generation.
-- **Images**: If your LLM outputs base64-encoded images, decode them before passing to DocuForge.
+- **Streaming/Async**: You can wrap PageForge calls in async tasks or APIs for real-time document generation.
+- **Images**: If your LLM outputs base64-encoded images, decode them before passing to PageForge.
 - **Custom Sections**: Extend section types or styles by customizing the engine or adding new section handlers.
 
 ### Example: LLM API Endpoint
 ```python
 from fastapi import FastAPI, UploadFile
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 
 app = FastAPI()
 
@@ -216,7 +216,7 @@ async def generate_pdf_endpoint(doc: dict):
 ```
 
 ---
-DocuForge is designed for seamless integration with LLM pipelines, agents, and automation tools.
+PageForge is designed for seamless integration with LLM pipelines, agents, and automation tools.
 
 ## Engine Extensibility
 You can register and use different engines (e.g., WeasyPrint) via the public API.
@@ -226,7 +226,7 @@ You can register and use different engines (e.g., WeasyPrint) via the public API
 
 ## Image Embedding
 
-DocuForge guarantees proper image embedding as XObjects in generated PDFs, which is critical for certain document validation requirements. The ReportLab engine implementation ensures exactly 3 distinct images are embedded as separate XObjects in each PDF.
+PageForge guarantees proper image embedding as XObjects in generated PDFs, which is critical for certain document validation requirements. The ReportLab engine implementation ensures exactly 3 distinct images are embedded as separate XObjects in each PDF.
 
 ### Key Image Embedding Features
 
@@ -238,8 +238,8 @@ DocuForge guarantees proper image embedding as XObjects in generated PDFs, which
 ### Image Embedding Example
 
 ```python
-from docuforge import generate_pdf
-from docuforge.models import DocumentData, Section, ImageData
+from pageforge import generate_pdf
+from pageforge.models import DocumentData, Section, ImageData
 
 # Load image data from files
 logo_data = open("logo.png", "rb").read()
@@ -266,7 +266,7 @@ pdf_bytes = generate_pdf(doc)
 
 ## Configuration Options
 
-DocuForge is highly configurable through environment variables and configuration files.
+PageForge is highly configurable through environment variables and configuration files.
 
 ### Main Configuration Options
 
@@ -292,8 +292,8 @@ Environment variables override configuration file settings:
 
 ```python
 # Using environment variables (highest priority)
-os.environ["DOCUFORGE_PAGE_WIDTH"] = "595"  # A4 width
-os.environ["DOCUFORGE_IMAGE_MAX_COUNT"] = "5"
+os.environ["PAGEFORGE_PAGE_WIDTH"] = "595"  # A4 width
+os.environ["PAGEFORGE_IMAGE_MAX_COUNT"] = "5"
 
 # Or configuration file (config.json/yaml/ini)
 # {
@@ -309,8 +309,8 @@ os.environ["DOCUFORGE_IMAGE_MAX_COUNT"] = "5"
 For more complex documents, use the fluent `DocumentBuilder` API:
 
 ```python
-from docuforge import generate_pdf
-from docuforge.builder import DocumentBuilder
+from pageforge import generate_pdf
+from pageforge.builder import DocumentBuilder
 
 # Create a document step by step
 doc = DocumentBuilder() \
@@ -319,7 +319,7 @@ doc = DocumentBuilder() \
     .add_section({"type": "paragraph", "text": "This is the first paragraph."}) \
     .add_section({"type": "table", "rows": [["A", "B"], [1, 2]]}) \
     .add_image({"name": "logo", "data": open("logo.png", "rb").read(), "format": "PNG"}) \
-    .set_meta({"author": "DocuForge", "subject": "Example"}) \
+    .set_meta({"author": "PageForge", "subject": "Example"}) \
     .build()
 
 # Generate PDF from the built document
@@ -331,8 +331,8 @@ pdf_bytes = generate_pdf(doc)
 Create and register custom rendering engines:
 
 ```python
-from docuforge.engines.engine_base import Engine, EngineRegistry
-from docuforge.models import DocumentData
+from pageforge.engines.engine_base import Engine, EngineRegistry
+from pageforge.models import DocumentData
 
 class CustomEngine(Engine):
     def __init__(self, name="Custom"):
@@ -346,7 +346,7 @@ class CustomEngine(Engine):
 EngineRegistry.register("custom", CustomEngine)
 
 # Use the engine
-from docuforge import generate_pdf
+from pageforge import generate_pdf
 pdf_bytes = generate_pdf(doc, engine="custom")
 ```
 
@@ -357,7 +357,7 @@ pdf_bytes = generate_pdf(doc, engine="custom")
 
 ## Production Deployment
 
-For detailed guidance on deploying DocuForge in production environments, refer to our comprehensive [Production Configuration Guide](docs/production_guide.md). This guide covers:
+For detailed guidance on deploying PageForge in production environments, refer to our comprehensive [Production Configuration Guide](docs/production_guide.md). This guide covers:
 
 - Production installation methods
 - Configuration best practices
@@ -370,7 +370,7 @@ For detailed guidance on deploying DocuForge in production environments, refer t
 
 ## License
 
-DocuForge is released under the [MIT License](LICENSE).
+PageForge is released under the [MIT License](LICENSE).
 
 Copyright (c) 2025 Mxolisi Msweli
 
@@ -378,4 +378,4 @@ See the [LICENSE](LICENSE) file for the full license text.
 
 ---
 
-For more information, visit the API documentation in the `src/docuforge/` directory or submit issues on the project repository.
+For more information, visit the API documentation in the `src/pageforge/` directory or submit issues on the project repository.

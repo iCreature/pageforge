@@ -1,8 +1,10 @@
 """
-Unit tests for docuforge.models (dataclasses, validation, edge cases).
+Unit tests for pageforge.models (dataclasses, validation, edge cases).
 """
 import pytest
-from docuforge.core import models
+
+from pageforge.core import models
+
 
 def test_documentdata_validation_cases():
     # Valid cases

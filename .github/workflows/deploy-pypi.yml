@@ -3,8 +3,9 @@ name: Deploy to PyPI
 on:
   push:
     branches:
+      # here you need to place the branch that you want to deploy to PyPI (test)
       - main
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -13,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning
+          fetch-depth: 0 
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,15 +43,22 @@ jobs:
         run: |
           pytest
 
-      # Only publish to Test PyPI on main branch pushes (non-tag)
-      - name: Publish to PyPI (Test)
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+      - name: Publish to TestPyPI
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+          TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+        run: |
+          echo "Token length: ${#TWINE_PASSWORD}"
+          if [ ${#TWINE_PASSWORD} -eq 0 ]; then
+            echo "Error: TEST_PYPI_TOKEN is empty! Make sure the secret is properly set in GitHub."
+            exit 1
+          fi
+          python -m twine upload --skip-existing --verbose dist/*
 
       - name: Test installation from TestPyPI
         run: |
-          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ docuforge
-          python -c "import docuforge; print(f'Installed version: {docuforge.__version__}')"
-          python -m docuforge.cli --version
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pageforge
+          python -c "import pageforge; print(f'Installed version: {pageforge.__version__}')"
+          pageforge --version

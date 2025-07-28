@@ -3,7 +3,10 @@ name: Release to PyPI
 on:
   push:
     tags:
-      - 'v*'  # Run when version tags are pushed
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -12,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning with setuptools-scm
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -34,16 +37,16 @@ jobs:
 
       - name: Smoke test installation
         run: |
-          pip install dist/*.whl
-          python -c "import docuforge; print(f'Installed version: {docuforge.__version__}')"
-          python -m docuforge.cli --version
+          pip install ./dist/*.whl
+          python -c "import pageforge; print(f'Installed version: {pageforge.__version__}')"
+          pageforge --version
 
-      # Upload to PyPI
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_TOKEN }}
-          verbose: true
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          python -m twine upload --skip-existing --verbose dist/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

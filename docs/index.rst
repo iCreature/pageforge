@@ -1,7 +1,7 @@
-Welcome to DocuForge's documentation!
+Welcome to PageForge's documentation!
 ===================================
 
-DocuForge is an AI-powered document generation system that supports PDF creation with consistent logo placement and page numbering.
+PageForge is an AI-powered document generation system that supports PDF creation with consistent logo placement and page numbering.
 
 .. toctree::
    :maxdepth: 2
@@ -30,15 +30,15 @@ Installation
 
 .. code-block:: bash
 
-   pip install docuforge
+   pip install pageforge
 
 Quick Start
 ----------
 
 .. code-block:: python
 
-   from docuforge.core.models import DocumentData, Section, ImageData
-   from docuforge.engines import generate_pdf_with_logo
+   from pageforge.core.models import DocumentData, Section, ImageData
+   from pageforge.engines import generate_pdf_with_logo
    
    # Create document structure
    doc = DocumentData(

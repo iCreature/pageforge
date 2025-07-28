@@ -1,13 +1,14 @@
 """
-Property-based tests for DocuForge using Hypothesis.
+Property-based tests for PageForge using Hypothesis.
 """
 import io
-import pytest
-from hypothesis import given, strategies as st, settings, note
+
+from hypothesis import given, note, settings
+from hypothesis import strategies as st
 from pypdf import PdfReader
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData
-from docuforge.core.exceptions import ValidationError
+
+from pageforge import generate_pdf
+from pageforge.core.exceptions import ValidationError
 
 
 # Define strategies for generating document data components

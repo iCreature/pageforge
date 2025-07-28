@@ -1,6 +1,7 @@
 import pytest
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section
+
+from pageforge import generate_pdf
+
 
 def test_missing_section_type():
     doc = {

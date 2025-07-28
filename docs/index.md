@@ -1,6 +1,6 @@
-# DocuForge Documentation
+# PageForge Documentation
 
-Welcome to the DocuForge documentation. This section contains comprehensive guides and references for using DocuForge effectively in various environments.
+Welcome to the PageForge documentation. This section contains comprehensive guides and references for using PageForge effectively in various environments.
 
 ## Getting Started
 

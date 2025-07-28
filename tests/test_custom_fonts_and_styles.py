@@ -1,17 +1,20 @@
-import pytest
-from docuforge import generate_pdf
-from docuforge.core.models import DocumentData, Section
-from pypdf import PdfReader
 import io
+
+from pypdf import PdfReader
+
+from pageforge import generate_pdf
+from pageforge.core.models import DocumentData
+
 
 def test_custom_font_size(monkeypatch):
     # Monkeypatch engine to use a large font
-    from docuforge.engines import reportlab_engine
+    from pageforge.engines import reportlab_engine
     orig_render = reportlab_engine.ReportLabEngine._render
     def big_font_render(self, doc):
+        import io
+
         from reportlab.lib.pagesizes import letter
         from reportlab.pdfgen import canvas
-        import io
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
         c.setFont("Helvetica", 36)

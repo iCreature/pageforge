@@ -1,5 +1,5 @@
 """
-Tests for the DocumentTemplate feature in DocuForge.
+Tests for the DocumentTemplate feature in PageForge.
 
 These tests validate the functionality of document templates, including:
 - Creating templates with placeholders
@@ -7,13 +7,18 @@ These tests validate the functionality of document templates, including:
 - Template registry operations
 - Serializing and deserializing templates
 """
-import unittest
 import json
-from docuforge.templating.templates import (
-    DocumentTemplate, TemplatePlaceholder, template_registry,
-    register_template, get_template
+import unittest
+
+from pageforge.core.models import Section
+from pageforge.templating.templates import (
+    DocumentTemplate,
+    TemplatePlaceholder,
+    get_template,
+    register_template,
+    template_registry,
 )
-from docuforge.core.models import Section, DocumentData
+
 
 class TestDocumentTemplates(unittest.TestCase):
     """Test cases for DocumentTemplate functionality."""
@@ -62,12 +67,12 @@ class TestDocumentTemplates(unittest.TestCase):
         )
         
         # Fill template with values
-        values = {"name": "John", "company": "DocuForge"}
+        values = {"name": "John", "company": "PageForge"}
         document = template.fill(values)
         
-        self.assertEqual(document.title, "Welcome to DocuForge")
+        self.assertEqual(document.title, "Welcome to PageForge")
         self.assertEqual(document.sections[0].text, "Hello, John!")
-        self.assertEqual(document.sections[1].text, "Welcome to DocuForge.")
+        self.assertEqual(document.sections[1].text, "Welcome to PageForge.")
     
     def test_template_registration(self):
         """Test registration and retrieval of templates."""

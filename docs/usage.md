@@ -1,19 +1,19 @@
 # Usage Guide
 
-This guide covers the basic and advanced usage patterns for DocuForge.
+This guide covers the basic and advanced usage patterns for PageForge.
 
 ## Basic Usage
 
 ### Creating a Simple Document
 
 ```python
-from docuforge.core.models import DocumentData, Section
-from docuforge.engines import generate_pdf
+from pageforge.core.models import DocumentData, Section
+from pageforge.engines import generate_pdf
 
 # Create document sections
 sections = [
     Section(type="header", text="My First Document"),
-    Section(type="paragraph", text="This is a simple document created with DocuForge."),
+    Section(type="paragraph", text="This is a simple document created with PageForge."),
     Section(type="paragraph", text="It demonstrates the basic capabilities of the library."),
     Section(type="footer", text="Page {page_number} of {total_pages}")
 ]
@@ -35,8 +35,8 @@ with open("simple_document.pdf", "wb") as f:
 ### Adding a Logo
 
 ```python
-from docuforge.core.models import DocumentData, Section, ImageData
-from docuforge.engines import generate_pdf_with_logo
+from pageforge.core.models import DocumentData, Section, ImageData
+from pageforge.engines import generate_pdf_with_logo
 
 # Load logo
 with open("path/to/logo.png", "rb") as f:
@@ -70,7 +70,7 @@ with open("logo_document.pdf", "wb") as f:
 
 ## Section Types
 
-DocuForge supports various section types for document content:
+PageForge supports various section types for document content:
 
 ### Headers
 
@@ -127,23 +127,23 @@ Footers appear at the bottom of each page. The placeholders `{page_number}` and 
 
 ## Command Line Interface
 
-DocuForge can be used from the command line:
+PageForge can be used from the command line:
 
 ```bash
 # Generate a PDF from a JSON file containing document data
-docuforge generate --input document_data.json --output result.pdf
+pageforge generate --input document_data.json --output result.pdf
 
 # Generate a PDF with a logo
-docuforge generate --input document_data.json --output result.pdf --logo company_logo.png
+pageforge generate --input document_data.json --output result.pdf --logo company_logo.png
 ```
 
 ## API Usage
 
-DocuForge includes a FastAPI application that can be used to generate PDFs via HTTP:
+PageForge includes a FastAPI application that can be used to generate PDFs via HTTP:
 
 ```bash
 # Start the API server
-docuforge serve --host 0.0.0.0 --port 8000
+pageforge serve --host 0.0.0.0 --port 8000
 ```
 
 Then send requests to the API:

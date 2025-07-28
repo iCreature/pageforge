@@ -1,13 +1,21 @@
 """
-Unit tests for docuforge.engines (engine interface, calls, mocks).
+Unit tests for pageforge.engines (engine interface, calls, mocks).
 """
-import pytest
 from unittest import mock
-from pypdf import PdfReader
-from docuforge.engines.reportlab_engine import ReportLabEngine
-from docuforge.engines.weasyprint_engine import WeasyPrintEngine
-from docuforge.core.models import DocumentData
-from docuforge.engines.engine_base import Engine, EngineRegistry
+
+import pytest
+
+from pageforge.core.models import DocumentData
+from pageforge.engines.engine_base import Engine, EngineRegistry
+from pageforge.engines.reportlab_engine import ReportLabEngine
+
+# Import engine flags first to avoid module load errors
+from pageforge.engines.weasyprint_engine import WEASYPRINT_AVAILABLE
+
+# Only import the actual engine class if dependencies are available
+if WEASYPRINT_AVAILABLE:
+    from pageforge.engines.weasyprint_engine import WeasyPrintEngine
+
 
 def test_reportlab_engine_calls(monkeypatch, sample_data_dict):
     engine = ReportLabEngine()
@@ -25,6 +33,10 @@ def test_reportlab_engine_calls(monkeypatch, sample_data_dict):
     assert isinstance(pdf2, bytes)
 
 def test_weasyprint_engine_calls(monkeypatch, sample_data_dict):
+    # Skip this test if WeasyPrint and its dependencies aren't available
+    if not WEASYPRINT_AVAILABLE:
+        pytest.skip("WeasyPrint and/or system dependencies not available")
+        
     engine = WeasyPrintEngine()
     monkeypatch.setattr(engine, "_render", mock.Mock(return_value=b"PDFDATA2"))
     # Only use valid DocumentData fields

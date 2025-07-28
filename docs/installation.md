@@ -1,6 +1,6 @@
 # Installation
 
-DocuForge is designed to be easy to install and use. Follow these instructions to get started with the library.
+PageForge is designed to be easy to install and use. Follow these instructions to get started with the library.
 
 ## Prerequisites
 
@@ -9,39 +9,39 @@ DocuForge is designed to be easy to install and use. Follow these instructions t
 
 ## Standard Installation
 
-Install DocuForge using pip:
+Install PageForge using pip:
 
 ```bash
-pip install docuforge
+pip install pageforge
 ```
 
 ## Development Installation
 
-For development purposes, you can install DocuForge from the source code:
+For development purposes, you can install PageForge from the source code:
 
 ```bash
-git clone https://github.com/yourusername/docuforge.git
-cd docuforge
+git clone https://github.com/yourusername/pageforge.git
+cd pageforge
 pip install -e ".[dev]"
 ```
 
 ## Dependencies
 
-DocuForge relies on the following key dependencies:
+PageForge relies on the following key dependencies:
 
 - **ReportLab**: For PDF generation
 - **fastapi**: For API functionality
 - **pydantic**: For data validation
 - **pillow**: For image processing
 
-These dependencies will be installed automatically when you install DocuForge.
+These dependencies will be installed automatically when you install PageForge.
 
 ## Verifying Installation
 
-To verify that DocuForge is installed correctly, you can run:
+To verify that PageForge is installed correctly, you can run:
 
 ```bash
-python -c "import docuforge; print(docuforge.__version__)"
+python -c "import pageforge; print(pageforge.__version__)"
 ```
 
 ## Optional Dependencies
@@ -49,7 +49,7 @@ python -c "import docuforge; print(docuforge.__version__)"
 For development and testing, you may want to install additional dependencies:
 
 ```bash
-pip install "docuforge[dev]"  # Install development dependencies
-pip install "docuforge[test]"  # Install testing dependencies
-pip install "docuforge[docs]"  # Install documentation dependencies
+pip install "pageforge[dev]"  # Install development dependencies
+pip install "pageforge[test]"  # Install testing dependencies
+pip install "pageforge[docs]"  # Install documentation dependencies
 ```

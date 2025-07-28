@@ -15,6 +15,9 @@ import random
 # Import directly from original invoice generator
 from llm_invoice_generator import SimpleInvoiceLLM, process_prompt
 
+# Import the pageforge package
+import pageforge
+
 # ReportLab imports
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
