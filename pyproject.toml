@@ -1,0 +1,118 @@
+[build-system]
+requires = ["setuptools>=69", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pageforge"
+dynamic = ["version"]
+description = "Flexible, extensible PDF/document generation library for LLM & programmatic pipelines."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [
+    {name = "PageForge Team", email = "mxolisi1025@gmail.com"}
+]
+keywords = ["pdf", "document", "generation", "reportlab", "pypdf", "llm", "automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: General",
+]
+dependencies = [
+    "reportlab>=4.0.9,<5",
+    "pypdf>=4.0,<5",
+    "pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+weasy = ["weasyprint>=61,<62"]
+dev = [
+    "pytest", 
+    "pytest-cov", 
+    "ruff", 
+    "mypy", 
+    "build", 
+    "twine",
+    "pytest-benchmark>=4.0.0",
+    "pytest-lazy-fixture>=0.6.0",
+    "hypothesis>=6.0.0",
+    "pdf2image>=1.16.0",
+    "imagehash>=4.3.0",
+]
+docs = [
+    "sphinx", 
+    "furo", 
+    "sphinx-rtd-theme>=1.2.0",
+    "sphinx-autodoc-typehints>=1.23.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.scripts]
+pageforge = "pageforge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/iCreature/pageforge"
+Issues = "https://github.com/iCreature/pageforge/issues"
+Changelog = "https://github.com/iCreature/pageforge/blob/main/CHANGELOG.md"
+Documentation = "https://pageforge.readthedocs.io/"
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pageforge = ["py.typed", "*.pyi"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = ["reportlab.*", "pypdf.*", "weasyprint.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+# Temporarily lowered coverage threshold during modernization
+addopts = "--cov=src/pageforge --cov-report=term-missing --cov-fail-under=65"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "B", "UP"]
+target-version = "py39"
+
+[tool.coverage.run]
+source = ["src/pageforge"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]

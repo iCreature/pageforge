@@ -1,0 +1,64 @@
+name: Deploy to PyPI
+
+on:
+  push:
+    branches:
+      # here you need to place the branch that you want to deploy to PyPI (test)
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine setuptools setuptools-scm wheel
+
+      - name: Build package
+        run: |
+          python -m build
+
+      - name: Check distribution
+        run: |
+          python -m twine check dist/*
+
+      # Run tests before deploying
+      - name: Install test dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        run: |
+          pytest
+
+      - name: Publish to TestPyPI
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+          TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+        run: |
+          echo "Token length: ${#TWINE_PASSWORD}"
+          if [ ${#TWINE_PASSWORD} -eq 0 ]; then
+            echo "Error: TEST_PYPI_TOKEN is empty! Make sure the secret is properly set in GitHub."
+            exit 1
+          fi
+          python -m twine upload --skip-existing --verbose dist/*
+
+      - name: Test installation from TestPyPI
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pageforge
+          python -c "import pageforge; print(f'Installed version: {pageforge.__version__}')"
+          pageforge --version
